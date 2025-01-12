@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:temu_app/pages/addacarapage.dart';
 import 'package:temu_app/model/acara.dart';
-import 'package:temu_app/pages/detailacara_page.dart';
-// import 'package:temu_app/service/acara_service.dart';
+import 'package:temu_app/pages/detailacarapage_acara.dart';
 import 'package:temu_app/dummydata/dmmyacara.dart';
 
 class AcaraPage extends StatefulWidget {
@@ -14,7 +13,7 @@ class AcaraPage extends StatefulWidget {
 
 class _AcaraPageState extends State<AcaraPage> {
   List<Acara> publishedAcara = [];
-  bool isLoading = true; // Menambahkan indikator loading
+  bool isLoading = true;
   String? errorMessage;
 
   @override
@@ -25,18 +24,19 @@ class _AcaraPageState extends State<AcaraPage> {
 
   Future<void> fetchAcara() async {
     try {
-      // Jika fetching data API gagal, gunakan data dummy
+      final userId = getCurrentUserId();
       final acaraList = dummyData();
-      // await AcaraService().getAcarafromApi();
+      final filteredAcara =
+          acaraList.where((acara) => acara.idOrganisasi == userId).toList();
       setState(() {
-        publishedAcara = acaraList;
+        publishedAcara = filteredAcara;
         isLoading = false;
       });
     } catch (e) {
-      // Menangani error jika terjadi kegagalan pada fetching data API
       setState(() {
         errorMessage = "Gagal memuat acara: ${e.toString()}";
-        publishedAcara = dummyData(); // Menampilkan data dummy
+        publishedAcara =
+            dummyData().where((acara) => acara.idOrganisasi == 0).toList();
         isLoading = false;
       });
     }
@@ -120,7 +120,7 @@ class _AcaraPageState extends State<AcaraPage> {
                               context,
                               MaterialPageRoute(
                                 builder: (context) =>
-                                    DetailAcaraPage(acara: acara),
+                                    DetailPageAcara(acara: acara),
                               ),
                             );
                           },
@@ -129,31 +129,89 @@ class _AcaraPageState extends State<AcaraPage> {
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10),
                             ),
-                            child: Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    acara.namaAcara ?? "Nama tidak tersedia",
-                                    style: const TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
+                            child: Stack(
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.all(10.0),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              acara.namaAcara ??
+                                                  "Nama tidak tersedia",
+                                              style: const TextStyle(
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                            const SizedBox(height: 6),
+                                            Text(
+                                              acara.kotaBerlangsung ??
+                                                  "Lokasi tidak tersedia",
+                                              style: const TextStyle(
+                                                fontSize: 14,
+                                              ),
+                                            ),
+                                            const SizedBox(height: 4),
+                                            Text(
+                                              'Harga: Rp ${acara.biayaDibutuhkan}',
+                                              style: const TextStyle(
+                                                fontSize: 14,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Positioned(
+                                  top: 8.0,
+                                  right: 8.0,
+                                  child: PopupMenuButton<String>(
+                                    onSelected: (value) {
+                                      if (value == 'hapus') {
+                                        deleteAcara(acara);
+                                      }
+                                    },
+                                    itemBuilder: (context) => [
+                                      PopupMenuItem(
+                                        value: 'hapus',
+                                        child: Container(
+                                          constraints: const BoxConstraints(
+                                            minWidth: 100, // Lebar minimum
+                                            maxWidth: 150,
+                                            minHeight: 50,
+                                            maxHeight: 100, // Lebar maksimum
+                                          ),
+                                          child: const ListTile(
+                                            leading: Icon(Icons.delete,
+                                                color: Colors.red),
+                                            title: Text(
+                                              'Hapus',
+                                              style: TextStyle(
+                                                  color: Colors.black),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                    icon: const Icon(Icons.more_vert),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(
+                                          10.0), // Membuat sudut melengkung
                                     ),
+                                    offset: Offset(0,
+                                        40), // Mengatur posisi pop-up menu relatif terhadap tombol
                                   ),
-                                  const SizedBox(height: 6),
-                                  Text(
-                                    acara.kotaBerlangsung ??
-                                        "Lokasi tidak tersedia",
-                                    style: const TextStyle(fontSize: 14),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    'Harga: Rp ${acara.biayaDibutuhkan}',
-                                    style: const TextStyle(fontSize: 14),
-                                  ),
-                                ],
-                              ),
+                                ),
+                              ],
                             ),
                           ),
                         );

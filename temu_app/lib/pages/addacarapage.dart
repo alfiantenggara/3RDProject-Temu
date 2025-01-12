@@ -6,14 +6,14 @@ import '../model/acara.dart';
 import '../service/acara_service.dart';
 
 class AddAcaraPage extends StatefulWidget {
-  const AddAcaraPage({Key? key}) : super(key: key);
+  const AddAcaraPage({super.key});
 
   @override
-  _AddAcaraPageState createState() => _AddAcaraPageState();
+  State<AddAcaraPage> createState() => _AddAcaraPageState();
 }
 
 class _AddAcaraPageState extends State<AddAcaraPage> {
-  String appBarTitle = "Tambah Acara";
+  String appBarTitle = "Buat Acara";
   List<Acara> publishedAcara = [];
   final _formKey = GlobalKey<FormState>();
   TextEditingController namaAcaraController = TextEditingController();
@@ -30,19 +30,6 @@ class _AddAcaraPageState extends State<AddAcaraPage> {
   String? formattedDate;
 
   @override
-  void initState() {
-    super.initState();
-
-    namaAcaraController.addListener(() {
-      setState(() {
-        appBarTitle = namaAcaraController.text.isNotEmpty
-            ? namaAcaraController.text
-            : "Tambah Acara";
-      });
-    });
-  }
-
-  @override
   void dispose() {
     namaAcaraController.dispose();
     super.dispose();
@@ -53,32 +40,42 @@ class _AddAcaraPageState extends State<AddAcaraPage> {
       setState(() {
         isLoading = true;
       });
+      try {
+        // Ambil idOrganisasi terlebih dahulu dari API
+        // String idOrganisasi = await fetchIdOrganisasi();
 
-      final acara = {
-        "idOrganisasi": ['idOrganisasi'],
-        "namaAcara": namaAcaraController.text,
-        "tanggalAcara": tanggalAcaraController.text,
-        "lokasiAcara": lokasiAcaraController.text,
-        "biayaDibutuhkan": biayaDibutuhkanController.text,
-        "kegiatanAcara": selectedKegiatan,
-        "kotaBerlangsung": kotaBerlangsungController.text,
-        "detailWaktu": [
-          {
-            "waktuMulai": waktuAwalController.text,
-            "waktuSelesai": waktuAkhirController.text,
-          },
-        ],
-      };
-      bool isSuccess = await AcaraService().addOrUpdateAcara(acara);
+        final acara = {
+          "idOrganisasi": ['idOrganisasi'],
+          // idOrganisasi // ID Organisasi yang didapatkan dari API
+          "namaAcara": namaAcaraController.text,
+          "tanggalAcara": tanggalAcaraController.text,
+          "lokasiAcara": lokasiAcaraController.text,
+          "biayaDibutuhkan": biayaDibutuhkanController.text,
+          "kegiatanAcara": selectedKegiatan,
+          "kotaBerlangsung": kotaBerlangsungController.text,
+          "detailWaktu": [
+            {
+              "waktuMulai": waktuAwalController.text,
+              "waktuSelesai": waktuAkhirController.text,
+            },
+          ],
+        };
 
-      if (isSuccess) {
+        bool isSuccess = await AcaraService().addOrUpdateAcara(acara);
+
+        if (isSuccess) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Acara berhasil ditambahkan!")),
+          );
+          Navigator.pop(context);
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Gagal menambahkan acara!")),
+          );
+        }
+      } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Acara berhasil ditambahkan!")),
-        );
-        Navigator.pop(context);
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Gagal menambahkan acara!")),
+          const SnackBar(content: Text("Gagal mengambil ID Organisasi!")),
         );
       }
 
@@ -152,32 +149,57 @@ class _AddAcaraPageState extends State<AddAcaraPage> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: const Color(0xFFD9EAFD),
-        title: Text(appBarTitle),
+        title: Text(
+          appBarTitle,
+          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
+        centerTitle: true, // Menempatkan title di tengah
+        leading: Padding(
+          padding: const EdgeInsets.only(
+              left: 10.0), // Menempatkan tombol Cancel di kiri
+          child: TextButton(
+            onPressed: () {
+              // Aksi untuk tombol Cancel
+              Navigator.pop(context); // Kembali ke halaman sebelumnya
+            },
+            style: TextButton.styleFrom(
+              backgroundColor: const Color(0xFFD9EAFD),
+              padding: const EdgeInsets.symmetric(vertical: 10),
+              minimumSize:
+                  const Size(100, 40), // Ukuran minimal tombol (lebar, tinggi)
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10.0), // Sudut melengkung
+              ),
+            ),
+            child: const Text(
+              "Batal", // Tombol dengan teks "Cancel"
+              style: TextStyle(color: Colors.black, fontSize: 14),
+            ),
+          ),
+        ),
         actions: [
           Padding(
-            padding: const EdgeInsets.only(right: 16.0),
+            padding: const EdgeInsets.only(
+                right: 10.0), // Menempatkan tombol Add Acara di kanan
             child: isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : TextButton.icon(
                     onPressed:
                         showConfirmationDialog, // Menampilkan dialog saat ditekan
                     style: TextButton.styleFrom(
-                      backgroundColor: const Color(0xFFE8EAFD),
+                      backgroundColor: const Color(0xFFD9EAFD),
                       padding: const EdgeInsets.symmetric(vertical: 10),
                       minimumSize: const Size(
-                          130, 44), // Ukuran minimal tombol (lebar, tinggi)
+                          100, 40), // Ukuran minimal tombol (lebar, tinggi)
                       shape: RoundedRectangleBorder(
                         borderRadius:
                             BorderRadius.circular(10.0), // Sudut melengkung
                       ),
                     ),
-                    icon: const Icon(
-                      Icons.add,
-                      color: Colors.black,
-                    ),
+
                     label: const Text(
                       "Add Acara",
-                      style: TextStyle(color: Colors.black, fontSize: 16),
+                      style: TextStyle(color: Colors.black, fontSize: 14),
                     ),
                   ),
           ),
@@ -194,19 +216,22 @@ class _AddAcaraPageState extends State<AddAcaraPage> {
                 controller: namaAcaraController,
                 decoration: const InputDecoration(
                   hintText: 'Masukkan Judul Acara ',
+                  filled: true,
+                  fillColor: const Color(0xffEFF3EA),
                 ),
                 validator: (value) => value == null || value.isEmpty
                     ? 'Nama acara tidak boleh kosong'
                     : null,
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: 20),
               const Text(
-                "Tanggal dan Waktu Acara",
+                "Tanggal Acara",
                 style: TextStyle(
                   fontWeight: FontWeight.w600,
                   fontSize: 12,
                 ),
               ),
+              const SizedBox(height: 10),
               TextFormField(
                 controller: tanggalAcaraController,
                 decoration: InputDecoration(
@@ -214,8 +239,11 @@ class _AddAcaraPageState extends State<AddAcaraPage> {
                   hintText: formattedDate ??
                       'Pilih Tanggal', // Menggunakan formattedDate yang disimpan
                   iconColor: Colors.grey,
-                  suffixIcon: Icon(Icons.arrow_drop_down),
-                  border: InputBorder.none,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  filled: true,
+                  fillColor: const Color(0xffEFF3EA),
                 ),
                 onTap: () async {
                   FocusScope.of(context).requestFocus(FocusNode());
@@ -270,7 +298,7 @@ class _AddAcaraPageState extends State<AddAcaraPage> {
                     ? 'Tanggal acara tidak boleh kosong'
                     : null,
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: 15),
               Row(
                 mainAxisAlignment: MainAxisAlignment
                     .spaceBetween, // Mengatur posisi kiri dan kanan
@@ -307,6 +335,8 @@ class _AddAcaraPageState extends State<AddAcaraPage> {
                                   borderRadius: BorderRadius.circular(
                                       12), // Rounded corners
                                 ),
+                                filled: true,
+                                fillColor: const Color(0xffEFF3EA),
                               ),
                               validator: (value) =>
                                   value == null || value.isEmpty
@@ -351,6 +381,8 @@ class _AddAcaraPageState extends State<AddAcaraPage> {
                                   borderRadius: BorderRadius.circular(
                                       12), // Rounded corners
                                 ),
+                                filled: true,
+                                fillColor: const Color(0xffEFF3EA),
                               ),
                               validator: (value) =>
                                   value == null || value.isEmpty
@@ -364,13 +396,26 @@ class _AddAcaraPageState extends State<AddAcaraPage> {
                   ),
                 ],
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: 15),
+              const Text(
+                "Lokasi Acara",
+                style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 12,
+                ),
+              ),
+              const SizedBox(height: 5),
               TextFormField(
                 controller: lokasiAcaraController,
-                maxLines:
-                    null, // Mengizinkan multiline (otomatis menyesuaikan tinggi)
-                decoration: const InputDecoration(
-                  labelText: 'Lokasi Acara',
+                maxLines: null,
+                minLines: 4, // Menentukan tinggi minimum (1 baris)
+                // Mengizinkan multiline (otomatis menyesuaikan tinggi)
+                decoration: InputDecoration(
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  filled: true,
+                  fillColor: const Color(0xffEFF3EA),
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -384,22 +429,34 @@ class _AddAcaraPageState extends State<AddAcaraPage> {
                 },
               ),
               const SizedBox(height: 10),
+              const Text(
+                "Biaya Acara",
+                style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 12,
+                ),
+              ),
+              const SizedBox(height: 4),
               TextFormField(
                 controller: biayaDibutuhkanController,
                 decoration: InputDecoration(
-                  labelText: 'Biaya Dibutuhkan',
-                  hintText: 'Masukkan biaya dalam Rupiah',
+                  hintText: 'Cth: 100.000',
                   prefixText: 'Rp ',
                   suffixText: ',00',
                   suffixStyle: const TextStyle(color: Colors.green),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12), // Rounded corners
                   ),
+                  filled: true,
+                  fillColor: const Color(0xffEFF3EA),
                 ),
                 keyboardType: TextInputType.number,
                 inputFormatters: [
                   FilteringTextInputFormatter.digitsOnly,
                   TextInputFormatter.withFunction((oldValue, newValue) {
+                    if (newValue.text.isEmpty) {
+                      return newValue;
+                    }
                     final parsed = int.tryParse(newValue.text);
                     if (parsed != null && parsed > 0) {
                       final formatted =
@@ -428,6 +485,14 @@ class _AddAcaraPageState extends State<AddAcaraPage> {
                 },
               ),
               const SizedBox(height: 10),
+              const Text(
+                "Jenis Kegiatan",
+                style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 12,
+                ),
+              ),
+              const SizedBox(height: 5),
               DropdownButtonFormField<String>(
                 value: selectedKegiatan,
                 decoration: InputDecoration(
@@ -471,9 +536,24 @@ class _AddAcaraPageState extends State<AddAcaraPage> {
                     const TextStyle(color: Colors.black), // Warna teks dropdown
               ),
               const SizedBox(height: 10),
+              const Text(
+                "Kota Berlangsungnya Acara",
+                style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 12,
+                ),
+              ),
+              const SizedBox(height: 5),
               TextFormField(
                 controller: kotaBerlangsungController,
-                decoration: const InputDecoration(labelText: 'Kota'),
+                decoration: InputDecoration(
+                  labelText: 'Kota',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12), // Rounded corners
+                  ),
+                  filled: true,
+                  fillColor: const Color(0xffEFF3EA),
+                ),
                 validator: (value) => value == null || value.isEmpty
                     ? 'Nama kota tidak boleh kosong'
                     : null,
