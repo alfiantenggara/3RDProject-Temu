@@ -44,7 +44,8 @@ class Horizontallist extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Text('Acara pada ${targetDate.toLocal()}',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                style:
+                    const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
           ),
           FutureBuilder<List<Acara>>(
             future: fetchAcaraByTanggal(targetDate),
@@ -93,7 +94,7 @@ class Horizontallist extends StatelessWidget {
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              acara.biayaDibutuhkan ?? 'Biaya Tidak Tersedia',
+                              acara.lokasiAcara ?? 'Biaya Tidak Tersedia',
                               style: TextStyle(color: Colors.green),
                             ),
                           ],

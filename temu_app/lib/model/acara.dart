@@ -6,7 +6,7 @@ class Acara {
   String? namaAcara;
   DateTime? tanggalAcara;
   String? lokasiAcara;
-  String? biayaDibutuhkan;
+  int? biayaDibutuhkan;
   String? kegiatanAcara;
   String? kotaBerlangsung;
   String? gambarAcara; // Gambar disimpan sebagai String (URL)
@@ -57,6 +57,11 @@ class Acara {
           detailWaktu?.map((e) => e.toJson()).toList(), // Konversi list ke JSON
     };
   }
+}
+
+int getCurrentUserId() {
+  // Ganti dengan logika autentikasi untuk mendapatkan ID user
+  return 101; // Contoh ID user
 }
 
 class DetailWaktuAcara {

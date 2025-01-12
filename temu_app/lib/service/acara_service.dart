@@ -46,6 +46,19 @@ class AcaraService {
     }
   }
 
+  Future<String> fetchIdOrganisasi() async {
+    final response =
+        await http.get(Uri.parse('https://api.example.com/organisasi'));
+
+    if (response.statusCode == 200) {
+      // Misalnya response body adalah JSON yang berisi idOrganisasi
+      var data = json.decode(response.body);
+      return data['idOrganisasi']; // Ambil idOrganisasi dari response
+    } else {
+      throw Exception('Failed to load organisasi');
+    }
+  }
+
   Future<List<Acara>> getAcarafromApi() async {
     try {
       final response = await http.get(Uri.parse(apiUrl));
