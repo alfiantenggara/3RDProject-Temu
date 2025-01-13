@@ -15,6 +15,8 @@ class AddAcaraPage extends StatefulWidget {
 class _AddAcaraPageState extends State<AddAcaraPage> {
   String appBarTitle = "Buat Acara";
   List<Acara> publishedAcara = [];
+  File? uploadedFile;
+
   final _formKey = GlobalKey<FormState>();
   TextEditingController namaAcaraController = TextEditingController();
   TextEditingController tanggalAcaraController = TextEditingController();
