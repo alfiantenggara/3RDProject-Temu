@@ -29,18 +29,18 @@ class _OnboardingPageState extends State<OnboardingPage> {
   final List<Map<String, String>> onboardingData = [
     {
       "title": "Selamat Datang di Aplikasi TEMU",
-      "description": "",
-      "animation": "assets/INIUNTUKASSET1.json",
+      "description": "Ayo bersama membuat dampak yang lebih baik.",
+      "image": "assets/TEMU.png", // Tambahkan referensi gambar
     },
     {
       "title": "Bantu Organisasi Lingkungan Menjalankan Programnya",
-      "description": "",
-      "animation": "assets/INIUNTUKASSET2.json",
+      "description": "Kontribusikan ide dan tenaga Anda.",
+      "animation": "assets/GAMBAR2.json",
     },
     {
       "title": "Temukan Sponsor Untuk Acara Lingkungan",
-      "description": "",
-      "animation": "assets/INIUNTUKASSET3.json",
+      "description": "Hubungkan acara dengan sponsor yang mendukung.",
+      "animation": "assets/GAMBAR3.json",
     },
   ];
 
@@ -48,7 +48,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        color: Color(0xFFC1C5D0), // Warna latar sesuai gambar dari Figma
+        color: Color(0xFFC1C5D0),
         child: Column(
           children: [
             Expanded(
@@ -61,15 +61,20 @@ class _OnboardingPageState extends State<OnboardingPage> {
                 },
                 itemCount: onboardingData.length,
                 itemBuilder: (context, index) {
+                  final data = onboardingData[index];
                   return Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      SizedBox(
-                        height: 300,
-                        child: Lottie.asset(onboardingData[index]['animation']!),
-                      ),
+                      if (data.containsKey('image')) ...[
+                        Image.asset(data['image']!, height: 300),
+                      ] else if (data.containsKey('animation')) ...[
+                        SizedBox(
+                          height: 300,
+                          child: Lottie.asset(data['animation']!),
+                        ),
+                      ],
                       Text(
-                        onboardingData[index]['title']!,
+                        data['title']!,
                         style: const TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
@@ -78,7 +83,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                       ),
                       const SizedBox(height: 16),
                       Text(
-                        onboardingData[index]['description']!,
+                        data['description']!,
                         style: const TextStyle(fontSize: 16),
                         textAlign: TextAlign.center,
                       ),
@@ -115,7 +120,6 @@ class _OnboardingPageState extends State<OnboardingPage> {
                 TextButton(
                   onPressed: () {
                     if (_currentPage == onboardingData.length - 1) {
-                      // Navigasi ke halaman berikutnya
                       print("Navigasi ke halaman utama");
                     } else {
                       _pageController.nextPage(
