@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'onboarding.dart'; // File untuk Onboarding
 import 'splashscreen.dart'; // File untuk Splashscreen
-// import 'loginorganisasi.dart'; // File untuk halaman Organisasi
-// import 'loginperusahaan.dart'; // File untuk halaman Perusahaan
 
 void main() {
   runApp(const MyApp());
@@ -19,12 +17,10 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      initialRoute: '/',
+      initialRoute: '/', // Rute awal menuju SplashScreen
       routes: {
-        '/': (context) => OnboardingPage(), // Rute awal (Onboarding)
-        '/splash': (context) => SplashScreen(), // Splashscreen
-        // '/organisasi': (context) => OrganisasiScreen(), // Halaman Organisasi
-        // '/perusahaan': (context) => PerusahaanScreen(), // Halaman Perusahaan
+        '/': (context) => const SplashScreen(),
+        '/onboarding': (context) => const OnboardingPage(),
       },
     );
   }

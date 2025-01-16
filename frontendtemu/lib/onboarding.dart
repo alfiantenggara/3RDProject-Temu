@@ -13,6 +13,7 @@ class OnboardingPage extends StatefulWidget {
 class _OnboardingPageState extends State<OnboardingPage> {
   final PageController _pageController = PageController();
   int _currentPage = 0;
+  String? _hoveredButton;
 
   final List<Map<String, String>> onboardingData = [
     {
@@ -92,7 +93,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                             ),
                             textAlign: TextAlign.center,
                           ),
-                          const SizedBox(height: 130), // Menambah jarak ke tombol
+                          const SizedBox(height: 130),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
@@ -195,21 +196,38 @@ class _OnboardingPageState extends State<OnboardingPage> {
     required String text,
     required VoidCallback onPressed,
   }) {
-    return ElevatedButton(
-      onPressed: onPressed,
-      style: ElevatedButton.styleFrom(
-        backgroundColor: const Color(0xFF3B6BFD),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(15),
-        ),
-        padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 20),
-      ),
-      child: Text(
-        text,
-        style: GoogleFonts.poppins(
-          color: Colors.white,
-          fontSize: 18,
-          fontWeight: FontWeight.w600,
+    bool isHovered = _hoveredButton == text;
+
+    return MouseRegion(
+      onEnter: (_) {
+        setState(() {
+          _hoveredButton = text;
+        });
+      },
+      onExit: (_) {
+        setState(() {
+          _hoveredButton = null;
+        });
+      },
+      child: SizedBox(
+        width: 200, // Ukuran tetap untuk lebar tombol
+        height: 60, // Ukuran tetap untuk tinggi tombol
+        child: ElevatedButton(
+          onPressed: onPressed,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: isHovered ? const Color(0xFF5B86FF) : const Color(0xFF3B6BFD),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(15),
+            ),
+          ),
+          child: Text(
+            text,
+            style: GoogleFonts.poppins(
+              color: Colors.white,
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
         ),
       ),
     );
@@ -255,6 +273,4 @@ class _OnboardingPageState extends State<OnboardingPage> {
       ),
     );
   }
-
-  String? _hoveredButton;
 }
