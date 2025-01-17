@@ -10,6 +10,8 @@ class Acara {
   String? kegiatanAcara;
   String? kotaBerlangsung;
   String? gambarAcara; // Gambar disimpan sebagai String (URL)
+  String? proposalFile; // URL atau path ke file proposal
+
   List<DetailWaktuAcara>? detailWaktu;
 
   Acara({

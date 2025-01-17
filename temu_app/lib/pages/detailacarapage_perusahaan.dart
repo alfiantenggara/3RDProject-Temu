@@ -1,19 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:temu_app/model/acara.dart';
 import 'package:intl/intl.dart';
+import 'package:temu_app/pages/beriuang.dart';
 
-class DetailPageAcara extends StatefulWidget {
+class DetailPagePerusahaan extends StatefulWidget {
   final Acara acara;
 
-  const DetailPageAcara({Key? key, required this.acara}) : super(key: key);
+  const DetailPagePerusahaan({super.key, required this.acara});
 
   @override
-  State<DetailPageAcara> createState() => DetailPageAcaraState();
+  State<DetailPagePerusahaan> createState() => DetailPagePerusahaanState();
 }
 
-class DetailPageAcaraState extends State<DetailPageAcara> {
+class DetailPagePerusahaanState extends State<DetailPagePerusahaan> {
   late Acara acara;
-  int ticketCount = 1;
+  bool isFavorited = false;
+  bool isShared = false;
 
   @override
   void initState() {
@@ -60,16 +62,47 @@ class DetailPageAcaraState extends State<DetailPageAcara> {
                 },
                 child: Stack(
                   children: [
-                    Container(
-                      height: MediaQuery.of(context).size.height * 0.6,
-                      decoration: BoxDecoration(
-                        image: DecorationImage(
-                          image: NetworkImage(
-                            acara.gambarAcara ??
-                                'https://via.placeholder.com/600x400',
+                    // Your image or background content
+                    Positioned.fill(
+                      child: Image.network(
+                        acara.gambarAcara ??
+                            'https://via.placeholder.com/600x400',
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+
+                    // Action buttons positioned at the top right
+                    Positioned(
+                      top: 16.0,
+                      right: 16.0,
+                      child: Row(
+                        children: [
+                          IconButton(
+                            icon: Icon(
+                              isFavorited
+                                  ? Icons.favorite
+                                  : Icons.favorite_border,
+                              color: isFavorited ? Colors.red : Colors.white,
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                isFavorited =
+                                    !isFavorited; // Toggle state favorit
+                              });
+                            },
                           ),
-                          fit: BoxFit.cover,
-                        ),
+                          IconButton(
+                            icon: Icon(
+                              isShared ? Icons.share : Icons.share_outlined,
+                              color: isShared ? Colors.blue : Colors.white,
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                isShared = !isShared; // Toggle state share
+                              });
+                            },
+                          ),
+                        ],
                       ),
                     ),
                   ],
@@ -87,7 +120,7 @@ class DetailPageAcaraState extends State<DetailPageAcara> {
                   color: Colors.white, // Background color for the container
                   borderRadius:
                       BorderRadius.circular(16), // Circular border radius
-                  boxShadow: [
+                  boxShadow: const [
                     BoxShadow(
                       color: Colors.black26, // Shadow color
                       blurRadius: 10, // Blur radius for the shadow
@@ -156,6 +189,33 @@ class DetailPageAcaraState extends State<DetailPageAcara> {
                           fontSize: 14,
                         ),
                       ),
+                      const SizedBox(
+                        height: 20,
+                      ),
+                      const Text(
+                        'Biaya Acara',
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      Text(
+                        NumberFormat.currency(
+                                locale: 'id_ID',
+                                symbol: 'Rp ',
+                                decimalDigits: 0)
+                            .format(acara.biayaDibutuhkan),
+                        style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black),
+                      ),
                       const SizedBox(height: 10),
                       const Text(
                         'Tentang Acara',
@@ -169,7 +229,7 @@ class DetailPageAcaraState extends State<DetailPageAcara> {
                         'Deskripsi tidak tersedia.',
                         style: TextStyle(fontSize: 16, color: Colors.grey[600]),
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 20),
                       const Text(
                         'Lokasi Event',
                         style: TextStyle(
@@ -177,11 +237,94 @@ class DetailPageAcaraState extends State<DetailPageAcara> {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 10),
                       Text(
                         acara.lokasiAcara ?? 'Lokasi tidak tersedia',
                         style: TextStyle(fontSize: 16, color: Colors.grey[600]),
                       ),
+                      const SizedBox(height: 20),
+                      const Text(
+                        'Kegiatan Event',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      Text(
+                        acara.kegiatanAcara ?? 'Kegiatan tidak tersedia',
+                        style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+                      ),
+                      const SizedBox(
+                        height: 20,
+                      ),
+                      const Text(
+                        'Proposal Event',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      if (acara.proposalFile != null)
+                        Container(
+                          decoration: BoxDecoration(
+                            border: Border.all(color: Colors.grey.shade300),
+                            borderRadius: BorderRadius.circular(8),
+                            color: Colors.grey.shade50,
+                          ),
+                          child: ListTile(
+                            leading: Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: Colors.blue.shade100,
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Icon(
+                                acara.proposalFile!.endsWith('.pdf')
+                                    ? Icons.picture_as_pdf
+                                    : Icons.insert_drive_file,
+                                color: Colors.blue,
+                              ),
+                            ),
+                            title: Text(
+                              'Proposal Event.${acara.proposalFile!.split('.').last}',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            subtitle: const Text('Tap untuk membuka file'),
+                            trailing: const Icon(Icons.open_in_new),
+                            onTap: () {
+                              // Implement file opening logic here
+                            },
+                          ),
+                        )
+                      else
+                        Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            border: Border.all(color: Colors.grey.shade300),
+                            borderRadius: BorderRadius.circular(8),
+                            color: Colors.grey.shade50,
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.info_outline,
+                                color: Colors.grey[600],
+                              ),
+                              const SizedBox(width: 12),
+                              Text(
+                                'Proposal tidak tersedia',
+                                style: TextStyle(
+                                  color: Colors.grey[600],
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                     ],
                   ),
                 ),
@@ -190,25 +333,71 @@ class DetailPageAcaraState extends State<DetailPageAcara> {
           ),
         ],
       ),
-
-      // Bottom button fixed at the bottom of the screen
       bottomNavigationBar: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: ElevatedButton(
-          onPressed: () {
-            // Add logic for ticket booking
-          },
-          style: ElevatedButton.styleFrom(
-            padding: const EdgeInsets.symmetric(horizontal: 150, vertical: 20),
-            backgroundColor: Colors.lightBlue,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8), // Adjust border radius
+        padding: const EdgeInsets.all(7.0),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // Tombol Chat
+            ConstrainedBox(
+              constraints:
+                  BoxConstraints.tightFor(height: 60), // Tentukan tinggi tombol
+              child: ElevatedButton(
+                onPressed: () {},
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(horizontal: 30),
+                  backgroundColor: Colors.green,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                child: const Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.chat_bubble_outline),
+                    SizedBox(
+                      height: 5,
+                    ),
+                    Text(
+                      'Chat',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
-          ),
-          child: const Text(
-            'Pesan Sekarang',
-            style: TextStyle(fontSize: 16, color: Colors.white),
-          ),
+            const SizedBox(
+              width: 10,
+            ),
+            // Tombol Sumbang Sekarang
+            ConstrainedBox(
+              constraints:
+                  BoxConstraints.tightFor(height: 60), // Tentukan tinggi tombol
+              child: ElevatedButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const BeriUangPage()),
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(horizontal: 100),
+                  backgroundColor: Colors.lightBlue,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                child: const Text(
+                  'Sumbang Sekarang',
+                  style: TextStyle(fontSize: 16, color: Colors.white),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );

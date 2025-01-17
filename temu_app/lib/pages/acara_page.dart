@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:temu_app/pages/addacarapage.dart';
 import 'package:temu_app/model/acara.dart';
-import 'package:temu_app/pages/detailacarapage_acara.dart';
 import 'package:temu_app/dummydata/dmmyacara.dart';
+import 'package:temu_app/pages/detailacarapage_perusahaan.dart';
 
 class AcaraPage extends StatefulWidget {
   const AcaraPage({super.key});
@@ -120,7 +121,7 @@ class _AcaraPageState extends State<AcaraPage> {
                               context,
                               MaterialPageRoute(
                                 builder: (context) =>
-                                    DetailPageAcara(acara: acara),
+                                    DetailPagePerusahaan(acara: acara),
                               ),
                             );
                           },
@@ -129,86 +130,151 @@ class _AcaraPageState extends State<AcaraPage> {
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10),
                             ),
-                            child: Stack(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
+                                Stack(
+                                  children: [
+                                    Container(
+                                      height: 100,
+                                      width: double.infinity,
+                                      decoration: const BoxDecoration(
+                                        color: Colors.green,
+                                        borderRadius: BorderRadius.only(
+                                          topLeft: Radius.circular(10),
+                                          topRight: Radius.circular(10),
+                                        ),
+                                      ),
+                                      child: ClipRRect(
+                                        borderRadius: const BorderRadius.only(
+                                          topLeft: Radius.circular(10),
+                                          topRight: Radius.circular(10),
+                                        ),
+                                        child: acara.gambarAcara != null
+                                            ? Image.network(
+                                                acara.gambarAcara!,
+                                                fit: BoxFit.cover,
+                                                errorBuilder: (context, error,
+                                                    stackTrace) {
+                                                  return const Center(
+                                                      child: Icon(Icons
+                                                          .image_not_supported));
+                                                },
+                                              )
+                                            : const Center(
+                                                child: Icon(Icons.image,
+                                                    color: Colors.white),
+                                              ),
+                                      ),
+                                    ),
+                                    Positioned(
+                                      top: 8.0,
+                                      right: 8.0,
+                                      child: Container(
+                                        decoration: BoxDecoration(
+                                          color: Colors.transparent,
+                                          borderRadius:
+                                              BorderRadius.circular(20),
+                                        ),
+                                        child: PopupMenuButton<String>(
+                                          onSelected: (value) {
+                                            if (value == 'hapus') {
+                                              deleteAcara(acara);
+                                            }
+                                          },
+                                          itemBuilder: (context) => [
+                                            PopupMenuItem(
+                                              value: 'hapus',
+                                              child: Container(
+                                                constraints:
+                                                    const BoxConstraints(
+                                                  minWidth: 100,
+                                                  maxWidth: 150,
+                                                  minHeight: 40,
+                                                  maxHeight: 60,
+                                                ),
+                                                child: const Row(
+                                                  children: [
+                                                    Icon(Icons.delete,
+                                                        color: Colors.red),
+                                                    SizedBox(width: 8),
+                                                    Text(
+                                                      'Hapus',
+                                                      style: TextStyle(
+                                                          color: Colors.black),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                          icon: const Icon(
+                                            Icons.more_vert,
+                                            color: Colors.white,
+                                            size: 24,
+                                          ),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(10.0),
+                                          ),
+                                          offset: const Offset(0, 40),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
                                 Padding(
                                   padding: const EdgeInsets.all(10.0),
                                   child: Column(
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     children: [
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              acara.namaAcara ??
-                                                  "Nama tidak tersedia",
-                                              style: const TextStyle(
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                            const SizedBox(height: 6),
-                                            Text(
+                                      Text(
+                                        acara.namaAcara ??
+                                            "Nama tidak tersedia",
+                                        style: const TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 6),
+                                      Row(
+                                        children: [
+                                          const Icon(
+                                            Icons.location_on,
+                                            color: Colors.red,
+                                            size: 16,
+                                          ),
+                                          const SizedBox(width: 4),
+                                          Expanded(
+                                            child: Text(
                                               acara.kotaBerlangsung ??
-                                                  "Lokasi tidak tersedia",
+                                                  'Lokasi tidak tersedia',
                                               style: const TextStyle(
-                                                fontSize: 14,
+                                                color: Colors.black,
+                                                fontSize: 15,
                                               ),
+                                              overflow: TextOverflow.ellipsis,
                                             ),
-                                            const SizedBox(height: 4),
-                                            Text(
-                                              'Harga: Rp ${acara.biayaDibutuhkan}',
-                                              style: const TextStyle(
-                                                fontSize: 14,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                Positioned(
-                                  top: 8.0,
-                                  right: 8.0,
-                                  child: PopupMenuButton<String>(
-                                    onSelected: (value) {
-                                      if (value == 'hapus') {
-                                        deleteAcara(acara);
-                                      }
-                                    },
-                                    itemBuilder: (context) => [
-                                      PopupMenuItem(
-                                        value: 'hapus',
-                                        child: Container(
-                                          constraints: const BoxConstraints(
-                                            minWidth: 100, // Lebar minimum
-                                            maxWidth: 150,
-                                            minHeight: 50,
-                                            maxHeight: 100, // Lebar maksimum
                                           ),
-                                          child: const ListTile(
-                                            leading: Icon(Icons.delete,
-                                                color: Colors.red),
-                                            title: Text(
-                                              'Hapus',
-                                              style: TextStyle(
-                                                  color: Colors.black),
-                                            ),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 8),
+                                      Align(
+                                        alignment: Alignment.bottomRight,
+                                        child: Text(
+                                          NumberFormat.currency(
+                                                  locale: 'id_ID',
+                                                  symbol: 'Rp ',
+                                                  decimalDigits: 0)
+                                              .format(acara.biayaDibutuhkan),
+                                          style: const TextStyle(
+                                            fontSize: 14,
+                                            color: Colors.green,
                                           ),
                                         ),
                                       ),
                                     ],
-                                    icon: const Icon(Icons.more_vert),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(
-                                          10.0), // Membuat sudut melengkung
-                                    ),
-                                    offset: Offset(0,
-                                        40), // Mengatur posisi pop-up menu relatif terhadap tombol
                                   ),
                                 ),
                               ],

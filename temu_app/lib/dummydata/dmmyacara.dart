@@ -28,7 +28,7 @@ List<Acara> dummyData() {
       tanggalAcara: DateTime(2025, 2, 20),
       lokasiAcara: "Gedung B, Bandung",
       biayaDibutuhkan: 75000,
-      kegiatanAcara: "Seminar dan Workshop",
+      kegiatanAcara: "Gunung",
       kotaBerlangsung: "Bandung",
       gambarAcara: "https://example.com/seminar_pendidikan.png",
       detailWaktu: [
