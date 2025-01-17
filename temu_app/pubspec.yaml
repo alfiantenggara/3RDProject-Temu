@@ -39,6 +39,8 @@ dependencies:
   google_fonts: ^6.2.1
   http: ^1.2.2
   intl: ^0.20.1
+  file_picker: ^8.1.7
+  open_file: ^3.5.10
 
 dev_dependencies:
   flutter_test:
