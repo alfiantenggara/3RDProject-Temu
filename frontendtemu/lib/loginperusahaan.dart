@@ -83,7 +83,6 @@ class LoginPerusahaan extends StatelessWidget {
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: () {
-                  // Logika untuk login
                 },
                 child: const Text('Masuk'),
               ),
@@ -272,7 +271,6 @@ class DaftarPerusahaan extends StatelessWidget {
             const SizedBox(height: 20),
             ElevatedButton.icon(
               onPressed: () {
-                // Logika unggah KTP
               },
               icon: const Icon(Icons.upload),
               label: const Text('Unggah KTP'),
@@ -297,7 +295,6 @@ class DaftarPerusahaan extends StatelessWidget {
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: () {
-                  // Logika untuk daftar
                 },
                 child: const Text('Daftar'),
               ),
@@ -381,7 +378,6 @@ class LupaKataSandiPerusahaan extends StatelessWidget {
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: () {
-                  // Logika untuk mengirim kode reset
                 },
                 child: const Text('Kirim Kode ke E-Mail'),
               ),
