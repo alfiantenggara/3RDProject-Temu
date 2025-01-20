@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:frontendtemu/loginorganisasi.dart';
+import 'package:frontendtemu/loginperusahaan.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lottie/lottie.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
@@ -177,14 +179,14 @@ class _OnboardingPageState extends State<OnboardingPage> {
           _buildSelectionButton(
             text: "Organisasi",
             onPressed: () {
-              print("Navigasi ke halaman Organisasi");
+              Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => LoginOrganisasi()));
             },
           ),
           const SizedBox(height: 20),
           _buildSelectionButton(
             text: "Perusahaan",
             onPressed: () {
-              print("Navigasi ke halaman Perusahaan");
+              Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => LoginPerusahaan()));
             },
           ),
         ],

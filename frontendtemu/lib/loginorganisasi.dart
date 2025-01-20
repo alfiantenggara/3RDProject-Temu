@@ -6,6 +6,9 @@ class LoginOrganisasi extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final TextEditingController namaOrganisasiController = TextEditingController();
+    final TextEditingController kataSandiController = TextEditingController();
+
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
@@ -33,10 +36,11 @@ class LoginOrganisasi extends StatelessWidget {
             ),
             const SizedBox(height: 20),
             TextField(
+              controller: namaOrganisasiController,
               decoration: InputDecoration(
                 labelText: 'Nama Organisasi',
                 labelStyle: GoogleFonts.poppins(),
-                border: OutlineInputBorder(),
+                border: const OutlineInputBorder(),
                 prefixIcon: const Icon(Icons.business),
                 contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               ),
@@ -46,11 +50,12 @@ class LoginOrganisasi extends StatelessWidget {
               builder: (context, setState) {
                 bool isObscure = true;
                 return TextField(
+                  controller: kataSandiController,
                   obscureText: isObscure,
                   decoration: InputDecoration(
                     labelText: 'Kata Sandi',
                     labelStyle: GoogleFonts.poppins(),
-                    border: OutlineInputBorder(),
+                    border: const OutlineInputBorder(),
                     prefixIcon: const Icon(Icons.lock),
                     suffixIcon: IconButton(
                       icon: Icon(isObscure ? Icons.visibility : Icons.visibility_off),
@@ -83,6 +88,8 @@ class LoginOrganisasi extends StatelessWidget {
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: () {
+                  String namaOrganisasi = namaOrganisasiController.text;
+                  String kataSandi = kataSandiController.text;
                 },
                 child: const Text('Masuk'),
               ),
@@ -118,6 +125,16 @@ class DaftarOrganisasi extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final TextEditingController namaOrganisasiController = TextEditingController();
+    final TextEditingController emailController = TextEditingController();
+    final TextEditingController kotaDomisiliController = TextEditingController();
+    final TextEditingController nomorTeleponController = TextEditingController();
+    final TextEditingController kataSandiController = TextEditingController();
+    final TextEditingController penanggungJawabController = TextEditingController();
+    final TextEditingController tanggalLahirController = TextEditingController();
+    final TextEditingController alamatLengkapController = TextEditingController();
+    bool isAgreed = false;
+
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
@@ -145,20 +162,22 @@ class DaftarOrganisasi extends StatelessWidget {
             ),
             const SizedBox(height: 20),
             TextField(
+              controller: namaOrganisasiController,
               decoration: InputDecoration(
                 labelText: 'Nama Organisasi',
                 labelStyle: GoogleFonts.poppins(),
-                border: OutlineInputBorder(),
+                border: const OutlineInputBorder(),
                 prefixIcon: const Icon(Icons.business),
                 contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               ),
             ),
             const SizedBox(height: 20),
             TextField(
+              controller: emailController,
               decoration: InputDecoration(
                 labelText: 'Alamat E-Mail',
                 labelStyle: GoogleFonts.poppins(),
-                border: OutlineInputBorder(),
+                border: const OutlineInputBorder(),
                 prefixIcon: const Icon(Icons.email),
                 contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               ),
@@ -166,20 +185,22 @@ class DaftarOrganisasi extends StatelessWidget {
             ),
             const SizedBox(height: 20),
             TextField(
+              controller: kotaDomisiliController,
               decoration: InputDecoration(
                 labelText: 'Kota Domisili Organisasi',
                 labelStyle: GoogleFonts.poppins(),
-                border: OutlineInputBorder(),
+                border: const OutlineInputBorder(),
                 prefixIcon: const Icon(Icons.location_city),
                 contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               ),
             ),
             const SizedBox(height: 20),
             TextField(
+              controller: nomorTeleponController,
               decoration: InputDecoration(
                 labelText: 'Nomor Telepon Organisasi',
                 labelStyle: GoogleFonts.poppins(),
-                border: OutlineInputBorder(),
+                border: const OutlineInputBorder(),
                 prefixIcon: const Icon(Icons.phone),
                 contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               ),
@@ -190,11 +211,12 @@ class DaftarOrganisasi extends StatelessWidget {
               builder: (context, setState) {
                 bool isObscure = true;
                 return TextField(
+                  controller: kataSandiController,
                   obscureText: isObscure,
                   decoration: InputDecoration(
                     labelText: 'Kata Sandi',
                     labelStyle: GoogleFonts.poppins(),
-                    border: OutlineInputBorder(),
+                    border: const OutlineInputBorder(),
                     prefixIcon: const Icon(Icons.lock),
                     suffixIcon: IconButton(
                       icon: Icon(isObscure ? Icons.visibility : Icons.visibility_off),
@@ -219,20 +241,22 @@ class DaftarOrganisasi extends StatelessWidget {
             ),
             const SizedBox(height: 10),
             TextField(
+              controller: penanggungJawabController,
               decoration: InputDecoration(
                 labelText: 'Nama Lengkap',
                 labelStyle: GoogleFonts.poppins(),
-                border: OutlineInputBorder(),
+                border: const OutlineInputBorder(),
                 prefixIcon: const Icon(Icons.person),
                 contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               ),
             ),
             const SizedBox(height: 20),
             TextField(
+              controller: tanggalLahirController,
               decoration: InputDecoration(
                 labelText: 'Tanggal Lahir',
                 labelStyle: GoogleFonts.poppins(),
-                border: OutlineInputBorder(),
+                border: const OutlineInputBorder(),
                 prefixIcon: const Icon(Icons.calendar_today),
                 contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               ),
@@ -244,43 +268,42 @@ class DaftarOrganisasi extends StatelessWidget {
                   firstDate: DateTime(1900),
                   lastDate: DateTime(2100),
                 );
-                // Handle pickedDate
+                if (pickedDate != null) {
+                  tanggalLahirController.text = pickedDate.toLocal().toString().split(' ')[0];
+                }
               },
             ),
             const SizedBox(height: 20),
             TextField(
-              decoration: InputDecoration(
-                labelText: 'Alamat E-Mail',
-                labelStyle: GoogleFonts.poppins(),
-                border: OutlineInputBorder(),
-                prefixIcon: const Icon(Icons.email),
-                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              ),
-              keyboardType: TextInputType.emailAddress,
-            ),
-            const SizedBox(height: 20),
-            TextField(
+              controller: alamatLengkapController,
               decoration: InputDecoration(
                 labelText: 'Alamat Lengkap',
                 labelStyle: GoogleFonts.poppins(),
-                border: OutlineInputBorder(),
+                border: const OutlineInputBorder(),
                 prefixIcon: const Icon(Icons.location_on),
                 contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               ),
             ),
             const SizedBox(height: 20),
             ElevatedButton.icon(
-              onPressed: () {
-              },
+              onPressed: () {},
               icon: const Icon(Icons.upload),
               label: const Text('Unggah KTP'),
             ),
             const SizedBox(height: 10),
             Row(
               children: [
-                Checkbox(
-                  value: false,
-                  onChanged: (value) {},
+                StatefulBuilder(
+                  builder: (context, setState) {
+                    return Checkbox(
+                      value: isAgreed,
+                      onChanged: (value) {
+                        setState(() {
+                          isAgreed = value ?? false;
+                        });
+                      },
+                    );
+                  },
                 ),
                 Expanded(
                   child: Text(
@@ -295,6 +318,16 @@ class DaftarOrganisasi extends StatelessWidget {
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: () {
+                  if (isAgreed) {
+                    String namaOrganisasi = namaOrganisasiController.text;
+                    String email = emailController.text;
+                    String kotaDomisili = kotaDomisiliController.text;
+                    String nomorTelepon = nomorTeleponController.text;
+                    String kataSandi = kataSandiController.text;
+                    String penanggungJawab = penanggungJawabController.text;
+                    String tanggalLahir = tanggalLahirController.text;
+                    String alamatLengkap = alamatLengkapController.text;
+                  }
                 },
                 child: const Text('Daftar'),
               ),
@@ -327,6 +360,9 @@ class LupaKataSandiOrganisasi extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final TextEditingController namaOrganisasiController = TextEditingController();
+    final TextEditingController emailController = TextEditingController();
+
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
@@ -354,20 +390,22 @@ class LupaKataSandiOrganisasi extends StatelessWidget {
             ),
             const SizedBox(height: 20),
             TextField(
+              controller: namaOrganisasiController,
               decoration: InputDecoration(
                 labelText: 'Nama Organisasi',
                 labelStyle: GoogleFonts.poppins(),
-                border: OutlineInputBorder(),
+                border: const OutlineInputBorder(),
                 prefixIcon: const Icon(Icons.business),
                 contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               ),
             ),
             const SizedBox(height: 20),
             TextField(
+              controller: emailController,
               decoration: InputDecoration(
                 labelText: 'Alamat E-Mail',
                 labelStyle: GoogleFonts.poppins(),
-                border: OutlineInputBorder(),
+                border: const OutlineInputBorder(),
                 prefixIcon: const Icon(Icons.email),
                 contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               ),
@@ -378,6 +416,8 @@ class LupaKataSandiOrganisasi extends StatelessWidget {
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: () {
+                  String namaOrganisasi = namaOrganisasiController.text;
+                  String email = emailController.text;
                 },
                 child: const Text('Kirim Kode ke E-Mail'),
               ),
