@@ -18,6 +18,7 @@ dependencies:
   intl: ^0.20.1
   file_picker: ^8.1.7
   open_file: ^3.5.10
+  intl: ^0.18.0 # Menambahkan dependensi intl
 
 
 dev_dependencies:
@@ -31,3 +32,4 @@ flutter:
     - assets/TEMU.png
     - assets/GAMBAR2.json
     - assets/GAMBAR3.json
+    - assets/GAMBAR4.jpg
