@@ -14,8 +14,11 @@ dependencies:
   lottie: ^2.3.2 # Menambahkan dependensi untuk Lottie
   google_fonts: ^5.0.0 # Menambahkan Google Fonts
   smooth_page_indicator: ^1.0.0+2
+  http: ^1.2.2
+  intl: ^0.20.1
+  file_picker: ^8.1.7
+  open_file: ^3.5.10
   intl: ^0.18.0 # Menambahkan dependensi intl
-
 
 
 dev_dependencies:
