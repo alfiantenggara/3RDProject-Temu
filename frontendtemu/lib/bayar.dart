@@ -5,7 +5,6 @@ class PembayaranPerusahaan {
   DateTime? tanggalPembayaran;
   String? buktiPembayaran;
 
-  // Constructor
   PembayaranPerusahaan({
     this.idRekeningPerusahaan,
     this.idAcara,
@@ -14,7 +13,6 @@ class PembayaranPerusahaan {
     this.buktiPembayaran,
   });
 
-  // Method untuk mengubah objek menjadi Map (untuk JSON)
   Map<String, dynamic> toJson() {
     return {
       'id_rekeningperusahaan': idRekeningPerusahaan,
@@ -25,7 +23,6 @@ class PembayaranPerusahaan {
     };
   }
 
-  // Method untuk mengubah Map (JSON) menjadi objek
   factory PembayaranPerusahaan.fromJson(Map<String, dynamic> json) {
     return PembayaranPerusahaan(
       idRekeningPerusahaan: json['id_rekeningperusahaan'],
@@ -45,7 +42,6 @@ class DetailPembayaran {
   int? biayaSponsor;
   int? biayaLayanan;
 
-  // Constructor
   DetailPembayaran({
     this.idPembayaran,
     this.idRekeningTemu,

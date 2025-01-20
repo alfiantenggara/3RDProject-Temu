@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:frontendtemu/dashboardperusahaan.dart';
 import 'package:frontendtemu/dashboardorganisasi.dart';
 import 'package:frontendtemu/profileorganisasi.dart';
-import 'onboarding.dart'; // File untuk Onboarding
-import 'splashscreen.dart'; // File untuk Splashscreen
-import 'loginorganisasi.dart'; // File untuk Login Organisasi
-import 'loginperusahaan.dart'; // File untuk Login Perusahaan
+import 'onboarding.dart'; 
+import 'splashscreen.dart'; 
+import 'loginorganisasi.dart'; 
+import 'loginperusahaan.dart'; 
 
 void main() {
   runApp(const MyApp());
@@ -22,12 +22,12 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      initialRoute: '/', // Rute awal menuju SplashScreen
+      initialRoute: '/', 
       routes: {
         '/': (context) => const SplashScreen(),
         '/onboarding': (context) => const OnboardingPage(),
-        //'/loginorganisasi': (context) => const LoginOrganisasi(), // Tambahkan rute untuk Login Organisasi
-        '/loginperusahaan': (context) => const LoginPerusahaan(), // Tambahkan rute untuk Login Perusahaan
+        '/loginorganisasi': (context) => const LoginOrganisasi(), 
+        '/loginperusahaan': (context) => const LoginPerusahaan(), 
         '/dashboardperusahaan': (context) => DashboardPerusahaan(),
         '/dashboardorganisasi': (context) => DashboardOrganisasi(),
         '/profileperusahaan': (context) => const ProfilePerusahaanPage(),
