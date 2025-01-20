@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontendtemu/dashboardperusahaan.dart';
 import 'package:frontendtemu/dashboardorganisasi.dart';
 import 'package:frontendtemu/profileorganisasi.dart';
 import 'onboarding.dart'; // File untuk Onboarding
@@ -23,6 +24,7 @@ class MyApp extends StatelessWidget {
       routes: {
         '/': (context) => const SplashScreen(),
         '/onboarding': (context) => const OnboardingPage(),
+        '/dashboardperusahaan': (context) => DashboardPerusahaan(),
         '/dashboardorganisasi': (context) => DashboardOrganisasi(),
         '/profileperusahaan': (context) => const ProfilePerusahaanPage(),
         '/profileorganisasi': (context) => ProfileOrganisasiPage(),
