@@ -6,6 +6,7 @@ import 'onboarding.dart';
 import 'splashscreen.dart'; 
 import 'loginorganisasi.dart'; 
 import 'loginperusahaan.dart'; 
+import 'profileperusahaan.dart'; 
 
 void main() {
   runApp(const MyApp());
@@ -30,7 +31,7 @@ class MyApp extends StatelessWidget {
         '/loginperusahaan': (context) => const LoginPerusahaan(), 
         '/dashboardperusahaan': (context) => DashboardPerusahaan(),
         '/dashboardorganisasi': (context) => DashboardOrganisasi(),
-        '/profileperusahaan': (context) => const ProfilePerusahaanPage(),
+        '/profileperusahaan': (context) => ProfilePerusahaanPage(),
         '/profileorganisasi': (context) => ProfileOrganisasiPage(),
       },
     );
