@@ -38,7 +38,7 @@ class LoginOrganisasi extends StatelessWidget {
             TextField(
               controller: namaOrganisasiController,
               decoration: InputDecoration(
-                labelText: 'Nama Organisasi',
+                labelText: 'Email Organisasi',
                 labelStyle: GoogleFonts.poppins(),
                 border: const OutlineInputBorder(),
                 prefixIcon: const Icon(Icons.business),
