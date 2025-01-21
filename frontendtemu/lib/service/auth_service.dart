@@ -11,7 +11,7 @@ import 'package:frontendtemu/loginorganisasi.dart'; // Import the login screen t
 final storage = FlutterSecureStorage();
 
 const host = '127.0.0.1';
-const port = '8080';
+const port = '8000';
 
 // API endpoint URLs
 const String apiLoginUrl = 'http://' + host + ':' + port + '/api/login';
@@ -36,10 +36,10 @@ class AuthService {
       print("Response status: ${response.statusCode}");
       print("Response body: ${response.body}");
 
-      final responseData = jsonDecode(response.body);
+      final responseData = jsonDecode(response.body)['data'];
       if (response.statusCode == 200) {
         final token = responseData['token'];
-        final userName = responseData['user']['namaorganisasi'];
+        final userName = responseData['level'] == "perusahaan" ? responseData['namaperusahaan'] : responseData['namaorganisasi'];
 
         if (token != null) {
           // Save token securely
@@ -62,17 +62,16 @@ class AuthService {
           return true;
         } else {
           print("No token found in the response");
+          throw Exception("Invalid token received from the server");
         }
       } else {
-        print('Failed to login, message: ' + responseData['data']['error']);
+        final errorMessage = responseData['data']['error'] ?? 'Unknown error';
+        print('Failed to login, message: $errorMessage');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(errorMessage)),
+        );
       }
-
-      // Handle error if login fails
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Login failed')),
-      );
     } catch (e) {
-      // Handle error during API request
       print("Error occurred during login: $e");
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('An error occurred, please try again')),
@@ -117,7 +116,7 @@ class AuthService {
       print("Response body: ${response.body}");
 
       // Handle response and return data
-      final responseData = jsonDecode(response.body);
+      final responseData = jsonDecode(response.body)['data'];
       if (response.statusCode == 200) {
         print("Registration response: $responseData");
 
@@ -173,7 +172,7 @@ class AuthService {
       print("Response body: ${response.body}");
 
       // Handle response and return data
-      final responseData = jsonDecode(response.body);
+      final responseData = jsonDecode(response.body)['data'];
       if (response.statusCode == 200) {
         print("Registration response: $responseData");
 
@@ -206,7 +205,7 @@ class AuthService {
         },
       );
 
-      final responseData = jsonDecode(response.body);
+      final responseData = jsonDecode(response.body)['data'];
       if (response.statusCode == 200) {
         // Clear stored token
         await storage.delete(key: 'auth_token');
