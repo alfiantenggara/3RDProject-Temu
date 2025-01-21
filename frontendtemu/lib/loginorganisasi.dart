@@ -1,14 +1,39 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'service/auth_service.dart';
 
-class LoginOrganisasi extends StatelessWidget {
+class LoginOrganisasi extends StatefulWidget {
   const LoginOrganisasi({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    final TextEditingController namaOrganisasiController = TextEditingController();
-    final TextEditingController kataSandiController = TextEditingController();
+  _LoginOrganisasiState createState() => _LoginOrganisasiState();
+}
 
+class _LoginOrganisasiState extends State<LoginOrganisasi> {
+  final _formKey = GlobalKey<FormState>();
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController kataSandiController = TextEditingController();
+  bool isObscure = true;
+
+  Future<void> login() async {
+    if (_formKey.currentState!.validate()) {
+      final email = emailController.text;
+      final password = kataSandiController.text;
+
+      print("Login attempt for $email");
+
+      final authService = AuthService();
+      bool success = await authService.login(email, password, context);
+      if (!success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Login gagal, coba lagi.')),
+        );
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
@@ -24,96 +49,107 @@ class LoginOrganisasi extends StatelessWidget {
       ),
       body: Padding(
         padding: const EdgeInsets.all(24.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Selamat Datang Kembali ke TEMU',
-              style: GoogleFonts.poppins(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Selamat Datang Kembali ke TEMU',
+                style: GoogleFonts.poppins(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            ),
-            const SizedBox(height: 20),
-            TextField(
-              controller: namaOrganisasiController,
-              decoration: InputDecoration(
-                labelText: 'Email Organisasi',
-                labelStyle: GoogleFonts.poppins(),
-                border: const OutlineInputBorder(),
-                prefixIcon: const Icon(Icons.business),
-                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              const SizedBox(height: 20),
+              TextFormField(
+                controller: emailController,
+                decoration: InputDecoration(
+                  labelText: 'Email Organisasi',
+                  labelStyle: GoogleFonts.poppins(),
+                  border: const OutlineInputBorder(),
+                  prefixIcon: const Icon(Icons.business),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Email tidak boleh kosong';
+                  }
+                  return null;
+                },
               ),
-            ),
-            const SizedBox(height: 20),
-            StatefulBuilder(
-              builder: (context, setState) {
-                bool isObscure = true;
-                return TextField(
-                  controller: kataSandiController,
-                  obscureText: isObscure,
-                  decoration: InputDecoration(
-                    labelText: 'Kata Sandi',
-                    labelStyle: GoogleFonts.poppins(),
-                    border: const OutlineInputBorder(),
-                    prefixIcon: const Icon(Icons.lock),
-                    suffixIcon: IconButton(
-                      icon: Icon(isObscure ? Icons.visibility : Icons.visibility_off),
-                      onPressed: () {
-                        setState(() {
-                          isObscure = !isObscure;
-                        });
-                      },
+              const SizedBox(height: 20),
+              StatefulBuilder(
+                builder: (context, setState) {
+                  return TextFormField(
+                    controller: kataSandiController,
+                    obscureText: isObscure,
+                    decoration: InputDecoration(
+                      labelText: 'Kata Sandi',
+                      labelStyle: GoogleFonts.poppins(),
+                      border: const OutlineInputBorder(),
+                      prefixIcon: const Icon(Icons.lock),
+                      suffixIcon: IconButton(
+                        icon: Icon(isObscure ? Icons.visibility : Icons.visibility_off),
+                        onPressed: () {
+                          setState(() {
+                            isObscure = !isObscure;
+                          });
+                        },
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                     ),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  ),
-                );
-              },
-            ),
-            const SizedBox(height: 10),
-            Align(
-              alignment: Alignment.centerRight,
-              child: TextButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const LupaKataSandiOrganisasi()),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Kata sandi tidak boleh kosong';
+                      }
+                      return null;
+                    },
                   );
                 },
-                child: const Text('Lupa Kata Sandi?'),
               ),
-            ),
-            const SizedBox(height: 20),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () {
-                  String namaOrganisasi = namaOrganisasiController.text;
-                  String kataSandi = kataSandiController.text;
-                },
-                child: const Text('Masuk'),
-              ),
-            ),
-            const SizedBox(height: 10),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Text('Belum Punya Akun? '),
-                GestureDetector(
-                  onTap: () {
+              const SizedBox(height: 10),
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton(
+                  onPressed: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => const DaftarOrganisasi()),
+                      MaterialPageRoute(builder: (context) => const LupaKataSandiOrganisasi()),
                     );
                   },
-                  child: const Text(
-                    'Daftar',
-                    style: TextStyle(color: Colors.blue),
-                  ),
+                  child: const Text('Lupa Kata Sandi?'),
                 ),
-              ],
-            ),
-          ],
+              ),
+              const SizedBox(height: 20),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: login,
+                  child: const Text('Masuk'),
+                ),
+              ),
+              const SizedBox(height: 10),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text('Belum Punya Akun? '),
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const DaftarOrganisasi()),
+                      );
+                    },
+                    child: const Text(
+                      'Daftar',
+                      style: TextStyle(color: Colors.blue),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -134,7 +170,7 @@ class DaftarOrganisasi extends StatelessWidget {
     final TextEditingController tanggalLahirController = TextEditingController();
     final TextEditingController alamatLengkapController = TextEditingController();
     bool isAgreed = false;
-
+    bool isObscure = true;
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
@@ -209,7 +245,6 @@ class DaftarOrganisasi extends StatelessWidget {
             const SizedBox(height: 20),
             StatefulBuilder(
               builder: (context, setState) {
-                bool isObscure = true;
                 return TextField(
                   controller: kataSandiController,
                   obscureText: isObscure,
