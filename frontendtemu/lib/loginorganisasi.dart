@@ -34,7 +34,7 @@ class LoginOrganisasi extends StatelessWidget {
             const SizedBox(height: 20),
             TextField(
               decoration: InputDecoration(
-                labelText: 'Nama Organisasi',
+                labelText: 'Email Organisasi',
                 labelStyle: GoogleFonts.poppins(),
                 border: OutlineInputBorder(),
                 prefixIcon: const Icon(Icons.business),
