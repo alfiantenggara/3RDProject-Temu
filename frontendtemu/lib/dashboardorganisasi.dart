@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:frontendtemu/loginorganisasi.dart';
 import 'package:frontendtemu/profileorganisasi.dart';
 import 'package:frontendtemu/service/auth_service.dart';
-import 'package:frontendtemu/service/perusahaan_service.dart'; // Import service perusahaan
+import 'package:frontendtemu/service/perusahaan_service.dart';
+import 'package:frontendtemu/chat.dart'; // Import halaman list pesan
 
 class DashboardOrganisasi extends StatefulWidget {
   @override
@@ -11,14 +12,12 @@ class DashboardOrganisasi extends StatefulWidget {
 
 class _DashboardOrganisasiState extends State<DashboardOrganisasi> {
   TextEditingController searchController = TextEditingController();
-  String keywordSearch = ''; // Variable buat nyimpen keyword search
-  late Future<Map<dynamic, dynamic>>
-      perusahaanList; // Kita bikin list perusahaan sebagai Future
+  String keywordSearch = '';
+  late Future<Map<dynamic, dynamic>> perusahaanList;
 
   @override
   void initState() {
     super.initState();
-    // Initial load perusahaan
     perusahaanList = PerusahaanService().getAllPerusahaan(context);
   }
 
@@ -110,7 +109,6 @@ class _DashboardOrganisasiState extends State<DashboardOrganisasi> {
                                 TextField(
                                   controller: searchController,
                                   onSubmitted: (value) {
-                                    // Ketika Enter ditekan
                                     _searchPerusahaan(value);
                                   },
                                   decoration: InputDecoration(
@@ -177,9 +175,14 @@ class _DashboardOrganisasiState extends State<DashboardOrganisasi> {
                     // Home Page logic
                     break;
                   case 1:
-                    // Pesan logic
+                    // Navigasi ke ListPesanPage
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => ListPesanPage()),
+                    );
                     break;
-                  case 3:
+                  case 2:
                     // Navigasi ke ProfileOrganisasi
                     Navigator.push(
                       context,
@@ -196,14 +199,11 @@ class _DashboardOrganisasiState extends State<DashboardOrganisasi> {
     );
   }
 
-  // Fungsi untuk search perusahaan
   Future<void> _searchPerusahaan(String keyword) async {
     setState(() {
       if (keyword.isEmpty) {
-        // Kalau keyword kosong, panggil getAllPerusahaan()
         perusahaanList = PerusahaanService().getAllPerusahaan(context);
       } else {
-        // Kalau ada keyword, panggil searchPerusahaan()
         perusahaanList = PerusahaanService().searchPerusahaan(keyword, context);
       }
     });
@@ -231,9 +231,8 @@ class Section extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 8),
-        // Gunakan ListView dengan tinggi yang responsif
         Container(
-          height: 190, // Tetap batasi tinggi
+          height: 190,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             itemCount: items.length,
@@ -274,11 +273,10 @@ class PerusahaanCard extends StatelessWidget {
           ),
         ],
       ),
-      clipBehavior: Clip.hardEdge, // Tambahkan ini
+      clipBehavior: Clip.hardEdge,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Ikon dengan ukuran yang lebih kecil
           ClipRRect(
             borderRadius: const BorderRadius.only(
               topLeft: Radius.circular(12),
@@ -286,19 +284,17 @@ class PerusahaanCard extends StatelessWidget {
             ),
             child: Icon(
               Icons.person,
-              size: 80, // Ukuran ikon dikurangi
+              size: 80,
               color: Colors.grey[600],
             ),
           ),
-          // Gunakan Expanded untuk teks agar tidak overflow
           Expanded(
             child: Padding(
               padding: const EdgeInsets.all(8.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min, // Pastikan Column tidak mengambil ruang lebih
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Nama Perusahaan
                   Text(
                     name,
                     style: const TextStyle(
@@ -309,7 +305,6 @@ class PerusahaanCard extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 4),
-                  // Lokasi Perusahaan
                   Text(
                     location,
                     style: const TextStyle(
@@ -320,7 +315,6 @@ class PerusahaanCard extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 4),
-                  // Nomor Telepon
                   Text(
                     phone,
                     style: const TextStyle(
