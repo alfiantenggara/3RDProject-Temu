@@ -6,13 +6,12 @@ import 'package:frontendtemu/dashboardperusahaan.dart';
 import 'package:frontendtemu/dashboardorganisasi.dart';
 import 'package:frontendtemu/loginperusahaan.dart'; // Import the login screen to redirect after logout
 import 'package:frontendtemu/loginorganisasi.dart'; // Import the login screen to redirect after logout
+import 'package:frontendtemu/service/consts.dart';
 
 // Initialize the storage for secure token storage
 final storage = FlutterSecureStorage();
 
-const host = '127.0.0.1';
-const port = '8000';
-const baseURL = 'http://' + host + ':' + port + '/api';
+const baseURL = hostURL;
 
 // API endpoint URLs
 const String apiLoginUrl = baseURL + '/login';
@@ -83,6 +82,47 @@ class AuthService {
     return false;
   }
 
+  Future<bool> logout(BuildContext context) async {
+    final url = Uri.parse(apiLogoutUrl);
+
+    try {
+      final token = await storage.read(key: 'auth_token');
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json',
+        "Accept": "application/json",
+        "Authorization": "Bearer $token"},
+      );
+
+      print("Response status: ${response.statusCode}");
+      print("Response body: ${response.body}");
+
+      final responseData = jsonDecode(response.body)['data'];
+      if (response.statusCode == 200) {
+        final level = responseData['level'];
+
+          storage.delete(key: 'auth_token');
+
+          // Redirect to HomeScreen on successful login
+          if (level == "perusahaan") {
+            Navigator.pushReplacementNamed(context, '/loginperusahaan');
+          } else {
+            Navigator.pushReplacementNamed(context, '/loginorganisasi');
+          }
+          return true;
+        } else {
+          print("No token found in the response");
+          throw Exception("Invalid token received from the server");
+        }
+    } catch (e) {
+      print("Error occurred during logout: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('An error occurred, please try again')),
+      );
+    }
+    return false;
+  }
+
   Future<String> getSession(BuildContext context) async {
     final url = Uri.parse(baseURL + '/getSession');
 
@@ -113,9 +153,6 @@ class AuthService {
       }
     } catch (e) {
       print("Error occurred during get session: $e");
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('An error occurred, please try again')),
-      );
       storage.delete(key: 'auth_token');
       return "None";
     }
@@ -155,12 +192,90 @@ class AuthService {
       }
     } catch (e) {
       print("Error occurred during get user: $e");
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('An error occurred, please try again')),
-      );
       return {
         'success': false,
         'message': 'Terjadi kesalahan. Periksa koneksi Anda.'
+      };
+    }
+  }
+
+  Future<Map<dynamic, dynamic>> updatePerusahaanDanPenanggungJawab({
+    required BuildContext context,
+    required String namaPerusahaan,
+    required String kotaDomisiliPerusahaan,
+    required String nomorTeleponPerusahaan,
+    required String namaLengkapPenanggungJawab,
+    required String tanggalLahirPenanggungJawab,
+    required String alamatLengkapPenanggungJawab,
+    required String emailPenanggungJawab,
+  }) async {
+    try {
+      final token = await storage.read(key: 'auth_token');
+      if (token == null) {
+        throw Exception('Token tidak ditemukan');
+      }
+
+      // Update data perusahaan
+      final perusahaanResponse = await http.put(
+        Uri.parse('$baseURL/perusahaan'), // Endpoint update perusahaan
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode({
+          'namaperusahaan': namaPerusahaan,
+          'kotadomisiliperusahaan': kotaDomisiliPerusahaan,
+          'nomorteleponperusahaan': nomorTeleponPerusahaan,
+        }),
+      );
+
+      print("Perusahaan Response status: ${perusahaanResponse.statusCode}");
+      print("Perusahaan Response body: ${perusahaanResponse.body}");
+
+      if (perusahaanResponse.statusCode != 200) {
+        return {
+          'success': false,
+          'message': 'Gagal mengupdate data perusahaan.',
+        };
+      }
+
+      // Update data penanggung jawab
+      final penanggungJawabResponse = await http.put(
+        Uri.parse('$baseURL/penanggungjawabperusahaan'), // Endpoint update penanggung jawab
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode({
+          'namaLengkapPenanggungJawab': namaLengkapPenanggungJawab,
+          'tanggalLahirPenanggungJawab': tanggalLahirPenanggungJawab,
+          'alamatLengkapPenanggungJawab': alamatLengkapPenanggungJawab,
+          'emailPenanggungJawab': emailPenanggungJawab,
+        }),
+      );
+
+      print("Penanggung Jawab Response status: ${penanggungJawabResponse.statusCode}");
+      print("Penanggung Jawab Response body: ${penanggungJawabResponse.body}");
+
+      if (penanggungJawabResponse.statusCode != 200) {
+        return {
+          'success': false,
+          'message': 'Gagal mengupdate data penanggung jawab.',
+        };
+      }
+
+      // Jika kedua request berhasil
+      return {
+        'success': true,
+        'message': 'Data perusahaan dan penanggung jawab berhasil diupdate.',
+      };
+    } catch (e) {
+      print("Error occurred during update: $e");
+      return {
+        'success': false,
+        'message': 'Terjadi kesalahan. Periksa koneksi Anda.',
       };
     }
   }
@@ -298,54 +413,4 @@ class AuthService {
     }
   }
 
-  // Logout function
-  Future<void> logout(BuildContext parentContext) async {
-    try {
-      // Revoke token logic (API call)
-      final token = await storage.read(key: 'auth_token');
-      final response = await http.post(
-        Uri.parse(baseURL + '/logout'),
-        headers: {
-          'Authorization': 'Bearer $token',
-        },
-      );
-
-      final responseData = jsonDecode(response.body)['data'];
-      if (response.statusCode == 200) {
-        // Clear stored token
-        await storage.delete(key: 'auth_token');
-
-        // Show snackbar on the parent context
-        ScaffoldMessenger.of(parentContext).showSnackBar(
-          const SnackBar(content: Text('Logout successful')),
-        );
-
-        // Navigate to the login screen
-        if (responseData['level'] == 'organisasi') {
-          Navigator.pushAndRemoveUntil(
-            parentContext,
-            MaterialPageRoute(builder: (context) => LoginOrganisasi()),
-            (route) => false,
-          );
-        } else {
-          Navigator.pushAndRemoveUntil(
-            parentContext,
-            MaterialPageRoute(builder: (context) => LoginPerusahaan()),
-            (route) => false,
-          );
-        }
-      } else {
-        print('Failed to logout, message: ' + responseData);
-        ScaffoldMessenger.of(parentContext).showSnackBar(
-          const SnackBar(content: Text('An error occurred, please try again')),
-        );
-      }
-    } catch (e) {
-      // Error handling
-      print("Error occurred during registration: $e");
-      ScaffoldMessenger.of(parentContext).showSnackBar(
-        const SnackBar(content: Text('An error occurred during logout')),
-      );
-    }
-  }
 }

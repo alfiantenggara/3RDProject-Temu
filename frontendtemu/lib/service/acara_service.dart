@@ -2,13 +2,12 @@ import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
+import 'package:frontendtemu/service/consts.dart';
 
 // Initialize the storage for secure token storage
 final storage = FlutterSecureStorage();
 
-const host = '127.0.0.1';
-const port = '8000';
-const baseURL = 'http://' + host + ':' + port + '/api/acara';
+const baseURL = hostURL + '/acara';
 
 class AcaraService {
   Future<Map<dynamic, dynamic>> getAllAcara(BuildContext context) async {

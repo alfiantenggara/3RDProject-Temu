@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontendtemu/loginperusahaan.dart';
+import 'package:frontendtemu/profileperusahaan.dart';
 import 'package:frontendtemu/service/auth_service.dart';
 import 'package:frontendtemu/service/acara_service.dart';
 import 'dart:convert';
@@ -12,7 +13,8 @@ class DashboardPerusahaan extends StatefulWidget {
 class _DashboardPerusahaanState extends State<DashboardPerusahaan> {
   TextEditingController searchController = TextEditingController();
   String keywordSearch = ''; // Variable buat nyimpen keyword search
-  late Future<Map<dynamic, dynamic>> acaraList; // Kita bikin list acara sebagai Future
+  late Future<Map<dynamic, dynamic>>
+      acaraList; // Kita bikin list acara sebagai Future
 
   @override
   void initState() {
@@ -34,7 +36,8 @@ class _DashboardPerusahaanState extends State<DashboardPerusahaan> {
         } else if (userSnapshot.hasError) {
           return Scaffold(
             backgroundColor: Color(0xFFECE5E4),
-            body: Center(child: Text('Error loading data: ${userSnapshot.error}')),
+            body: Center(
+                child: Text('Error loading data: ${userSnapshot.error}')),
           );
         } else {
           final userData = userSnapshot.data as Map<dynamic, dynamic>?;
@@ -49,7 +52,8 @@ class _DashboardPerusahaanState extends State<DashboardPerusahaan> {
             return SizedBox();
           }
 
-          final String namaPerusahaan = userData['data']['namaPerusahaan'] ?? 'Perusahaan';
+          final String namaPerusahaan =
+              userData['data']['namaPerusahaan'] ?? 'Perusahaan';
 
           return Scaffold(
             backgroundColor: Color(0xFFECE5E4),
@@ -68,7 +72,9 @@ class _DashboardPerusahaanState extends State<DashboardPerusahaan> {
                 if (acaraSnapshot.connectionState == ConnectionState.waiting) {
                   return Center(child: CircularProgressIndicator());
                 } else if (acaraSnapshot.hasError) {
-                  return Center(child: Text('Error loading acara: ${acaraSnapshot.error}'));
+                  return Center(
+                      child:
+                          Text('Error loading acara: ${acaraSnapshot.error}'));
                 } else {
                   final resultAcara =
                       acaraSnapshot.data as Map<dynamic, dynamic>;
@@ -128,7 +134,8 @@ class _DashboardPerusahaanState extends State<DashboardPerusahaan> {
                                 : 'No Events',
                             events: acaraListData.map<EventCard>((acara) {
                               return EventCard(
-                                title: acara['nama_acara'] ?? 'Acara Tidak Diketahui',
+                                title: acara['nama_acara'] ??
+                                    'Acara Tidak Diketahui',
                                 price: acara['biaya_dibutuhkan'] != null
                                     ? 'Rp. ${acara['biaya_dibutuhkan']}'
                                     : 'Rp. 0',
@@ -170,6 +177,28 @@ class _DashboardPerusahaanState extends State<DashboardPerusahaan> {
                   label: 'Profil',
                 ),
               ],
+              onTap: (index) {
+                // Handle item tap
+                switch (index) {
+                  case 0:
+                    // Home Page logic
+                    break;
+                  case 1:
+                    // Pesan logic
+                    break;
+                  case 2:
+                    // Riwayat logic
+                    break;
+                  case 3:
+                    // Navigasi ke ProfilePerusahaan
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => ProfilePerusahaanPage()),
+                    );
+                    break;
+                }
+              },
             ),
           );
         }
@@ -191,7 +220,6 @@ class _DashboardPerusahaanState extends State<DashboardPerusahaan> {
   }
 }
 
-
 class Section extends StatelessWidget {
   final String title;
   final List<EventCard> events;
@@ -209,10 +237,6 @@ class Section extends StatelessWidget {
             Text(
               title,
               style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-            const Text(
-              'Lebih Lanjut',
-              style: TextStyle(color: Colors.blue),
             ),
           ],
         ),
