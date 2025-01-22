@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:frontendtemu/loginorganisasi.dart';
 import 'package:frontendtemu/loginperusahaan.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -7,6 +8,7 @@ import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'service/auth_service.dart';
 import 'package:frontendtemu/dashboardperusahaan.dart';
 import 'package:frontendtemu/dashboardorganisasi.dart';
+import 'dart:async';
 
 class OnboardingPage extends StatefulWidget {
   const OnboardingPage({super.key});
@@ -16,26 +18,21 @@ class OnboardingPage extends StatefulWidget {
 }
 
 class _OnboardingPageState extends State<OnboardingPage> {
+  final storage = FlutterSecureStorage();
   final PageController _pageController = PageController();
   int _currentPage = 0;
   String? _hoveredButton;
 
+  bool _isSessionLoaded = false;
+  String? _userLevel;
+
   Future<void> getSession() async {
     final authService = AuthService();
     String level = await authService.getSession(context);
-    if (level == "perusahaan") {
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(builder: (context) => DashboardPerusahaan()),
-        (route) => false,
-      );
-    } else if (level == "organisasi") {
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(builder: (context) => DashboardOrganisasi()),
-        (route) => false,
-      );
-    }
+    setState(() {
+      _userLevel = level;
+      _isSessionLoaded = true;
+    });
   }
 
   final List<Map<String, String>> onboardingData = [
@@ -57,8 +54,32 @@ class _OnboardingPageState extends State<OnboardingPage> {
   ];
 
   @override
-  Widget build(BuildContext context) {
+  void initState() {
+    super.initState();
     getSession();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!_isSessionLoaded) {
+      // Tampilkan loading dulu
+      return Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
+    if (_userLevel == "perusahaan") {
+      return DashboardPerusahaan();
+    } else if (_userLevel == "organisasi") {
+      return DashboardOrganisasi();
+    }
+    // Default ke buildPage
+    return buildPage(context);
+  }
+
+  Widget buildPage(BuildContext context) {
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(
@@ -126,7 +147,8 @@ class _OnboardingPageState extends State<OnboardingPage> {
                                 defaultColor: const Color(0xFF515D84),
                                 hoverColor: const Color(0xFF737BA1),
                                 onPressed: () {
-                                  _pageController.jumpToPage(onboardingData.length);
+                                  _pageController
+                                      .jumpToPage(onboardingData.length);
                                 },
                               ),
                               const SizedBox(width: 16),
@@ -135,14 +157,17 @@ class _OnboardingPageState extends State<OnboardingPage> {
                                 defaultColor: const Color(0xFF3B6BFD),
                                 hoverColor: const Color(0xFF5B86FF),
                                 onPressed: () {
-                                  if (_currentPage == onboardingData.length - 1) {
+                                  if (_currentPage ==
+                                      onboardingData.length - 1) {
                                     _pageController.nextPage(
-                                      duration: const Duration(milliseconds: 300),
+                                      duration:
+                                          const Duration(milliseconds: 300),
                                       curve: Curves.easeInOut,
                                     );
                                   } else {
                                     _pageController.nextPage(
-                                      duration: const Duration(milliseconds: 300),
+                                      duration:
+                                          const Duration(milliseconds: 300),
                                       curve: Curves.easeInOut,
                                     );
                                   }
@@ -201,14 +226,16 @@ class _OnboardingPageState extends State<OnboardingPage> {
           _buildSelectionButton(
             text: "Organisasi",
             onPressed: () {
-              Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => LoginOrganisasi()));
+              Navigator.pushReplacement(context,
+                  MaterialPageRoute(builder: (context) => LoginOrganisasi()));
             },
           ),
           const SizedBox(height: 20),
           _buildSelectionButton(
             text: "Perusahaan",
             onPressed: () {
-              Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => LoginPerusahaan()));
+              Navigator.pushReplacement(context,
+                  MaterialPageRoute(builder: (context) => LoginPerusahaan()));
             },
           ),
         ],
@@ -239,7 +266,8 @@ class _OnboardingPageState extends State<OnboardingPage> {
         child: ElevatedButton(
           onPressed: onPressed,
           style: ElevatedButton.styleFrom(
-            backgroundColor: isHovered ? const Color(0xFF5B86FF) : const Color(0xFF3B6BFD),
+            backgroundColor:
+                isHovered ? const Color(0xFF5B86FF) : const Color(0xFF3B6BFD),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(15),
             ),

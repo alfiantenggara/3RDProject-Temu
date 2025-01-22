@@ -88,9 +88,6 @@ class AuthService {
 
     try {
       final token = await storage.read(key: 'auth_token');
-      if (token == null) {
-        
-      }
       final response = await http.post(url, headers: {
         'Content-Type': 'application/json',
         "Accept": "application/json",
@@ -105,32 +102,66 @@ class AuthService {
         if (token != null) {
           print("Token: $token");
           print("Registered For : ${responseData['level']}");
-          // Redirect to HomeScreen on successful login
-          if (responseData['level'] == "perusahaan") {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => DashboardPerusahaan()),
-            );
-          } else {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => DashboardOrganisasi()),
-            );
-          }
           return responseData['level'];
         } else {
           print("No token found in the response");
           throw Exception("Invalid token received from the server");
         }
       } else {
+        storage.delete(key: 'auth_token');
         return "None";
       }
     } catch (e) {
-      print("Error occurred during login: $e");
+      print("Error occurred during get session: $e");
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('An error occurred, please try again')),
       );
+      storage.delete(key: 'auth_token');
       return "None";
+    }
+  }
+
+  Future<Map<dynamic, dynamic>> getUserData(BuildContext context) async {
+    final url = Uri.parse(baseURL + '/user');
+
+    try {
+      final token = await storage.read(key: 'auth_token');
+      final response = await http.get(url, headers: {
+        'Content-Type': 'application/json',
+        "Accept": "application/json",
+        "Authorization": "Bearer $token"
+      });
+
+      print("Response status: ${response.statusCode}");
+      print("Response body: ${response.body}");
+
+      final responseData = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        if (token != null) {
+          return {
+            'success': true,
+            'message': responseData['message'],
+            'data': responseData['data']['user']
+          };
+        } else {
+          print("No token found in the response");
+          throw Exception("Invalid token received from the server");
+        }
+      } else {
+        return {
+          'success': false,
+          'message': 'Terjadi kesalahan. Periksa koneksi Anda.'
+        };
+      }
+    } catch (e) {
+      print("Error occurred during get user: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('An error occurred, please try again')),
+      );
+      return {
+        'success': false,
+        'message': 'Terjadi kesalahan. Periksa koneksi Anda.'
+      };
     }
   }
 

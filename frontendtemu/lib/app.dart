@@ -3,7 +3,6 @@ import 'package:frontendtemu/dashboardperusahaan.dart';
 import 'package:frontendtemu/dashboardorganisasi.dart';
 import 'package:frontendtemu/profileorganisasi.dart';
 import 'onboarding.dart'; 
-import 'splashscreen.dart'; 
 import 'loginorganisasi.dart'; 
 import 'loginperusahaan.dart'; 
 import 'profileperusahaan.dart'; 
@@ -25,8 +24,7 @@ class MyApp extends StatelessWidget {
       ),
       initialRoute: '/', 
       routes: {
-        '/': (context) => const SplashScreen(),
-        '/onboarding': (context) => const OnboardingPage(),
+        '/': (context) => const OnboardingPage(),
         '/loginorganisasi': (context) => const LoginOrganisasi(), 
         '/loginperusahaan': (context) => const LoginPerusahaan(), 
         '/dashboardperusahaan': (context) => DashboardPerusahaan(),
