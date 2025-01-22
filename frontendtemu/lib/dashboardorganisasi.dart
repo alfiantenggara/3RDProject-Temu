@@ -166,10 +166,6 @@ class _DashboardOrganisasiState extends State<DashboardOrganisasi> {
                   label: 'Pesan',
                 ),
                 BottomNavigationBarItem(
-                  icon: Icon(Icons.history),
-                  label: 'Riwayat',
-                ),
-                BottomNavigationBarItem(
                   icon: Icon(Icons.person),
                   label: 'Profil',
                 ),
@@ -182,9 +178,6 @@ class _DashboardOrganisasiState extends State<DashboardOrganisasi> {
                     break;
                   case 1:
                     // Pesan logic
-                    break;
-                  case 2:
-                    // Riwayat logic
                     break;
                   case 3:
                     // Navigasi ke ProfileOrganisasi

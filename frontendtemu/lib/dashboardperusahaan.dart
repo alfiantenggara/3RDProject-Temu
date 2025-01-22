@@ -169,10 +169,6 @@ class _DashboardPerusahaanState extends State<DashboardPerusahaan> {
                   label: 'Pesan',
                 ),
                 BottomNavigationBarItem(
-                  icon: Icon(Icons.history),
-                  label: 'Riwayat',
-                ),
-                BottomNavigationBarItem(
                   icon: Icon(Icons.person),
                   label: 'Profil',
                 ),
@@ -187,9 +183,6 @@ class _DashboardPerusahaanState extends State<DashboardPerusahaan> {
                     // Pesan logic
                     break;
                   case 2:
-                    // Riwayat logic
-                    break;
-                  case 3:
                     // Navigasi ke ProfilePerusahaan
                     Navigator.push(
                       context,

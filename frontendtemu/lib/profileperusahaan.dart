@@ -266,10 +266,6 @@ class _ProfilePerusahaanPageState extends State<ProfilePerusahaanPage> {
                   label: 'Pesan',
                 ),
                 BottomNavigationBarItem(
-                  icon: Icon(Icons.history),
-                  label: 'Riwayat',
-                ),
-                BottomNavigationBarItem(
                   icon: Icon(Icons.person),
                   label: 'Profil',
                 ),
@@ -290,10 +286,6 @@ class _ProfilePerusahaanPageState extends State<ProfilePerusahaanPage> {
                     Navigator.pushReplacementNamed(context, '/pesan');
                     break;
                   case 2:
-                    // Navigasi ke Riwayat
-                    Navigator.pushReplacementNamed(context, '/riwayat');
-                    break;
-                  case 3:
                     // Navigasi ke Profil (tidak perlu navigasi karena sudah di halaman profil)
                     break;
                 }
