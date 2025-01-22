@@ -4,6 +4,9 @@ import 'package:frontendtemu/loginperusahaan.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lottie/lottie.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
+import 'service/auth_service.dart';
+import 'package:frontendtemu/dashboardperusahaan.dart';
+import 'package:frontendtemu/dashboardorganisasi.dart';
 
 class OnboardingPage extends StatefulWidget {
   const OnboardingPage({super.key});
@@ -16,6 +19,24 @@ class _OnboardingPageState extends State<OnboardingPage> {
   final PageController _pageController = PageController();
   int _currentPage = 0;
   String? _hoveredButton;
+
+  Future<void> getSession() async {
+    final authService = AuthService();
+    String level = await authService.getSession(context);
+    if (level == "perusahaan") {
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => DashboardPerusahaan()),
+        (route) => false,
+      );
+    } else if (level == "organisasi") {
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => DashboardOrganisasi()),
+        (route) => false,
+      );
+    }
+  }
 
   final List<Map<String, String>> onboardingData = [
     {
@@ -37,6 +58,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
 
   @override
   Widget build(BuildContext context) {
+    getSession();
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(

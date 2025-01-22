@@ -12,10 +12,11 @@ final storage = FlutterSecureStorage();
 
 const host = '127.0.0.1';
 const port = '8000';
+const baseURL = 'http://' + host + ':' + port + '/api';
 
 // API endpoint URLs
-const String apiLoginUrl = 'http://' + host + ':' + port + '/api/login';
-const String apiLogoutUrl = 'http://' + host + ':' + port + '/api/logout';
+const String apiLoginUrl = baseURL + '/login';
+const String apiLogoutUrl = baseURL + '/logout';
 
 class AuthService {
   // Login function
@@ -39,7 +40,9 @@ class AuthService {
       final responseData = jsonDecode(response.body)['data'];
       if (response.statusCode == 200) {
         final token = responseData['token'];
-        final userName = responseData['level'] == "perusahaan" ? responseData['namaperusahaan'] : responseData['namaorganisasi'];
+        final userName = responseData['level'] == "perusahaan"
+            ? responseData['namaperusahaan']
+            : responseData['namaorganisasi'];
 
         if (token != null) {
           // Save token securely
@@ -65,7 +68,7 @@ class AuthService {
           throw Exception("Invalid token received from the server");
         }
       } else {
-        final errorMessage = responseData['data']['error'] ?? 'Unknown error';
+        final errorMessage = responseData ?? 'Unknown error';
         print('Failed to login, message: $errorMessage');
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(errorMessage)),
@@ -80,20 +83,71 @@ class AuthService {
     return false;
   }
 
+  Future<String> getSession(BuildContext context) async {
+    final url = Uri.parse(baseURL + '/getSession');
+
+    try {
+      final token = await storage.read(key: 'auth_token');
+      if (token == null) {
+        
+      }
+      final response = await http.post(url, headers: {
+        'Content-Type': 'application/json',
+        "Accept": "application/json",
+        "Authorization": "Bearer $token"
+      });
+
+      print("Response status: ${response.statusCode}");
+      print("Response body: ${response.body}");
+
+      final responseData = jsonDecode(response.body)['data'];
+      if (response.statusCode == 200) {
+        if (token != null) {
+          print("Token: $token");
+          print("Registered For : ${responseData['level']}");
+          // Redirect to HomeScreen on successful login
+          if (responseData['level'] == "perusahaan") {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => DashboardPerusahaan()),
+            );
+          } else {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => DashboardOrganisasi()),
+            );
+          }
+          return responseData['level'];
+        } else {
+          print("No token found in the response");
+          throw Exception("Invalid token received from the server");
+        }
+      } else {
+        return "None";
+      }
+    } catch (e) {
+      print("Error occurred during login: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('An error occurred, please try again')),
+      );
+      return "None";
+    }
+  }
+
   // Register function
-  Future<Map<String, dynamic>> register_perusahaan(
-    String email,
-    String namaPerusahaan,
-    String kotaDomisiliPerusahaan,
-    String namaLengkapPenanggungJawab,
-    String tanggalLahirPenanggungJawab,
-    String alamatLengkapPenanggungJawab,
-    String nomorTeleponPerusahaan,
-    String emailPenanggungJawab,
-    String password,
-  ) async {
-    final url =
-        Uri.parse('http://' + host + ':' + port + '/api/register_perusahaan');
+  Future<Map<dynamic, dynamic>> register_perusahaan(
+      String email,
+      String namaPerusahaan,
+      String kotaDomisiliPerusahaan,
+      String namaLengkapPenanggungJawab,
+      String tanggalLahirPenanggungJawab,
+      String alamatLengkapPenanggungJawab,
+      String nomorTeleponPerusahaan,
+      String emailPenanggungJawab,
+      String password,
+      String ktpBase64,
+      BuildContext context) async {
+    final url = Uri.parse(baseURL + '/register_perusahaan');
 
     try {
       final response = await http.post(
@@ -109,6 +163,7 @@ class AuthService {
           'nomorTeleponPerusahaan': nomorTeleponPerusahaan,
           'emailPenanggungJawab': emailPenanggungJawab,
           'password': password,
+          'ktpPenanggungJawab': ktpBase64
         }),
       );
 
@@ -118,18 +173,27 @@ class AuthService {
       // Handle response and return data
       final responseData = jsonDecode(response.body)['data'];
       if (response.statusCode == 200) {
-        print("Registration response: $responseData");
-
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => LoginPerusahaan()),
+          (route) => false,
+        );
         return {
-          'success': responseData['success'],
+          'success': true,
           'message': responseData['message'] ?? '',
         };
       } else {
-        print('Failed to register, message: ' + responseData['data']['error']);
+        print('Failed to register, message: ' + responseData);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('An error occurred, please try again')),
+        );
         return {'success': false, 'message': 'Terjadi kesalahan pada server'};
       }
     } catch (e) {
       print("Error occurred during registration: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('An error occurred, please try again')),
+      );
       return {
         'success': false,
         'message': 'Terjadi kesalahan. Periksa koneksi Anda.'
@@ -138,18 +202,18 @@ class AuthService {
   }
 
   Future<Map<String, dynamic>> register_organisasi(
-    String email,
-    String namaOrganisasi,
-    String kotaDomisiliOrganisasi,
-    String namaLengkapPenanggungJawab,
-    String tanggalLahirPenanggungJawab,
-    String alamatLengkapPenanggungJawab,
-    String nomorTeleponOrganisasi,
-    String emailPenanggungJawab,
-    String password,
-  ) async {
-    final url =
-        Uri.parse('http://' + host + ':' + port + '/api/register_organisasi');
+      String email,
+      String namaOrganisasi,
+      String kotaDomisiliOrganisasi,
+      String namaLengkapPenanggungJawab,
+      String tanggalLahirPenanggungJawab,
+      String alamatLengkapPenanggungJawab,
+      String nomorTeleponOrganisasi,
+      String emailPenanggungJawab,
+      String password,
+      String ktpBase64,
+      BuildContext context) async {
+    final url = Uri.parse(baseURL + '/register_organisasi');
 
     try {
       final response = await http.post(
@@ -165,6 +229,7 @@ class AuthService {
           'nomorTeleponOrganisasi': nomorTeleponOrganisasi,
           'emailPenanggungJawab': emailPenanggungJawab,
           'password': password,
+          'ktpPenanggungJawab': ktpBase64
         }),
       );
 
@@ -174,18 +239,27 @@ class AuthService {
       // Handle response and return data
       final responseData = jsonDecode(response.body)['data'];
       if (response.statusCode == 200) {
-        print("Registration response: $responseData");
-
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => LoginOrganisasi()),
+          (route) => false,
+        );
         return {
-          'success': responseData['success'],
+          'success': true,
           'message': responseData['message'] ?? '',
         };
       } else {
-        print('Failed to register, message: ' + responseData['data']['error']);
+        print('Failed to register, message: ' + responseData);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('An error occurred, please try again')),
+        );
         return {'success': false, 'message': 'Terjadi kesalahan pada server'};
       }
     } catch (e) {
       print("Error occurred during registration: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('An error occurred, please try again')),
+      );
       return {
         'success': false,
         'message': 'Terjadi kesalahan. Periksa koneksi Anda.'
@@ -199,7 +273,7 @@ class AuthService {
       // Revoke token logic (API call)
       final token = await storage.read(key: 'auth_token');
       final response = await http.post(
-        Uri.parse('http://' + host + ':' + port + '/api/logout'),
+        Uri.parse(baseURL + '/logout'),
         headers: {
           'Authorization': 'Bearer $token',
         },
@@ -230,11 +304,14 @@ class AuthService {
           );
         }
       } else {
-        print('Failed to logout, message: ' + responseData['data']['error']);
-        throw Exception('Failed to logout');
+        print('Failed to logout, message: ' + responseData);
+        ScaffoldMessenger.of(parentContext).showSnackBar(
+          const SnackBar(content: Text('An error occurred, please try again')),
+        );
       }
     } catch (e) {
       // Error handling
+      print("Error occurred during registration: $e");
       ScaffoldMessenger.of(parentContext).showSnackBar(
         const SnackBar(content: Text('An error occurred during logout')),
       );
