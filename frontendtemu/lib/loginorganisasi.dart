@@ -186,7 +186,7 @@ class _DaftarOrganisasiState extends State<DaftarOrganisasi> {
   var resultKTP;
 
   Future<void> registerOrganisasi() async {
-    if (isAgreed) {
+    if (_formKey.currentState!.validate() && isAgreed) {
       final email = emailController.text;
       final namaOrganisasi = namaOrganisasiController.text;
       final kotaDomisili = kotaDomisiliController.text;

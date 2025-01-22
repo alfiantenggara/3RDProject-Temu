@@ -186,7 +186,7 @@ class _DaftarPerusahaanState extends State<DaftarPerusahaan> {
   var resultKTP;
 
   Future<void> registerPerusahaan() async {
-    if (isAgreed) {
+    if (_formKey.currentState!.validate() && isAgreed) {
       final email = emailController.text;
       final namaPerusahaan = namaPerusahaanController.text;
       final kotaDomisili = kotaDomisiliController.text;

@@ -1,156 +1,307 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:frontendtemu/service/auth_service.dart';
+import 'package:frontendtemu/loginorganisasi.dart';
+import 'package:frontendtemu/dashboardorganisasi.dart';
 
-class ProfileOrganisasiPage extends StatelessWidget {
+class ProfileOrganisasiPage extends StatefulWidget {
+  @override
+  _ProfileOrganisasiPageState createState() => _ProfileOrganisasiPageState();
+}
+
+class _ProfileOrganisasiPageState extends State<ProfileOrganisasiPage> {
+  late Future<Map<dynamic, dynamic>> _userDataFuture;
+  final AuthService _authService = AuthService();
+
+  // Controller untuk TextField
+  final TextEditingController _namaOrganisasiController = TextEditingController();
+  final TextEditingController _kotaDomisiliController = TextEditingController();
+  final TextEditingController _nomorTeleponController = TextEditingController();
+  final TextEditingController _namaLengkapController = TextEditingController();
+  final TextEditingController _tanggalLahirController = TextEditingController();
+  final TextEditingController _alamatLengkapController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _userDataFuture = _authService.getUserData(context);
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          'Profil Organisasi',
-          style: GoogleFonts.poppins(
-            color: Colors.black,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        backgroundColor: Colors.grey[200],
-        elevation: 0,
-        iconTheme: IconThemeData(color: Colors.black),
-      ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Center(
+    return FutureBuilder(
+      future: _userDataFuture,
+      builder: (context, userSnapshot) {
+        if (userSnapshot.connectionState == ConnectionState.waiting) {
+          return Scaffold(
+            backgroundColor: Colors.grey[200],
+            body: Center(child: CircularProgressIndicator()),
+          );
+        } else if (userSnapshot.hasError) {
+          return Scaffold(
+            backgroundColor: Colors.grey[200],
+            body: Center(child: Text('Error loading data: ${userSnapshot.error}')),
+          );
+        } else {
+          final userData = userSnapshot.data as Map<dynamic, dynamic>?;
+          if (userData == null || userData['success'] == false) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(builder: (context) => LoginOrganisasi()),
+                (route) => false,
+              );
+            });
+            return SizedBox();
+          }
+
+          // Ambil data organisasi dan penanggung jawab dari response
+          final organisasiData = userData['data'];
+          final penanggungJawabData = organisasiData['penanggungJawab'];
+
+          // Set nilai awal TextField
+          if (_namaOrganisasiController.text.isEmpty) {
+            _namaOrganisasiController.text = organisasiData['namaOrganisasi'] ?? 'Nama Organisasi Tidak Diketahui';
+          }
+          if (_kotaDomisiliController.text.isEmpty) {
+            _kotaDomisiliController.text = organisasiData['kotaDomisiliOrganisasi'] ?? 'Kota Tidak Diketahui';
+          }
+          if (_nomorTeleponController.text.isEmpty) {
+            _nomorTeleponController.text = organisasiData['nomorTeleponOrganisasi'] ?? 'Telepon Tidak Diketahui';
+          }
+          if (_namaLengkapController.text.isEmpty) {
+            _namaLengkapController.text = penanggungJawabData['namaLengkap'] ?? 'Nama Lengkap Tidak Diketahui';
+          }
+          if (_tanggalLahirController.text.isEmpty) {
+            _tanggalLahirController.text = penanggungJawabData['tanggalLahir'] ?? 'Tanggal Lahir Tidak Diketahui';
+          }
+          if (_alamatLengkapController.text.isEmpty) {
+            _alamatLengkapController.text = penanggungJawabData['alamatLengkap'] ?? 'Alamat Tidak Diketahui';
+          }
+          if (_emailController.text.isEmpty) {
+            _emailController.text = penanggungJawabData['email'] ?? 'Email Tidak Diketahui';
+          }
+
+          return Scaffold(
+            appBar: AppBar(
+              title: Text(
+                'Profil Organisasi',
+                style: GoogleFonts.poppins(
+                  color: Colors.black,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              backgroundColor: Colors.grey[200],
+              elevation: 0,
+              automaticallyImplyLeading: false, // Menghilangkan tombol back
+            ),
+            body: SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    CircleAvatar(
-                      radius: 50,
-                      backgroundColor: Colors.grey[300],
-                      child: Icon(
-                        Icons.people,
-                        size: 50,
-                        color: Colors.grey[600],
+                    Center(
+                      child: Column(
+                        children: [
+                          CircleAvatar(
+                            radius: 50,
+                            backgroundColor: Colors.grey[300],
+                            child: Icon(
+                              Icons.person,
+                              size: 50,
+                              color: Colors.grey[600],
+                            ),
+                          ),
+                          SizedBox(height: 16),
+                          Text(
+                            'Profil Organisasi',
+                            style: GoogleFonts.poppins(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(height: 24),
+                    _buildTextFieldLabel('Nama Organisasi'),
+                    _buildTextField(
+                      icon: Icons.business,
+                      hint: 'Masukkan nama organisasi',
+                      controller: _namaOrganisasiController,
+                    ),
+                    SizedBox(height: 16),
+                    _buildTextFieldLabel('Kota Domisili Organisasi'),
+                    _buildTextField(
+                      icon: Icons.location_city,
+                      hint: 'Masukkan kota domisili',
+                      controller: _kotaDomisiliController,
+                    ),
+                    SizedBox(height: 16),
+                    _buildTextFieldLabel('Nomor Telepon Organisasi'),
+                    _buildTextField(
+                      icon: Icons.phone,
+                      prefix: '+62',
+                      hint: 'Masukkan nomor telepon',
+                      controller: _nomorTeleponController,
+                    ),
+                    SizedBox(height: 32),
+                    Text(
+                      'Penanggung Jawab Organisasi',
+                      style: GoogleFonts.poppins(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
                       ),
                     ),
                     SizedBox(height: 16),
-                    Text(
-                      'Profil',
-                      style: GoogleFonts.poppins(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
+                    _buildTextFieldLabel('Nama Lengkap'),
+                    _buildTextField(
+                      icon: Icons.person,
+                      hint: 'Masukkan nama lengkap',
+                      controller: _namaLengkapController,
+                    ),
+                    SizedBox(height: 16),
+                    _buildTextFieldLabel('Tanggal Lahir'),
+                    _buildTextField(
+                      icon: Icons.calendar_today,
+                      hint: 'Masukkan tanggal lahir',
+                      controller: _tanggalLahirController,
+                    ),
+                    SizedBox(height: 16),
+                    _buildTextFieldLabel('Alamat Lengkap'),
+                    _buildTextField(
+                      icon: Icons.location_on,
+                      hint: 'Masukkan alamat lengkap',
+                      controller: _alamatLengkapController,
+                    ),
+                    SizedBox(height: 16),
+                    _buildTextFieldLabel('Email'),
+                    _buildTextField(
+                      icon: Icons.email,
+                      hint: 'Masukkan email',
+                      controller: _emailController,
+                    ),
+                    SizedBox(height: 32),
+                    // Row untuk menata tombol Simpan Perubahan dan Logout
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        // Tombol Simpan Perubahan
+                        ElevatedButton(
+                          onPressed: () async {
+                            final result = await _authService.updateOrganisasiDanPenanggungJawab(
+                              context: context,
+                              namaOrganisasi: _namaOrganisasiController.text,
+                              kotaDomisiliOrganisasi: _kotaDomisiliController.text,
+                              nomorTeleponOrganisasi: _nomorTeleponController.text,
+                              namaLengkapPenanggungJawab: _namaLengkapController.text,
+                              tanggalLahirPenanggungJawab: _tanggalLahirController.text,
+                              alamatLengkapPenanggungJawab: _alamatLengkapController.text,
+                              emailPenanggungJawab: _emailController.text,
+                            );
+
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(result['message'] ?? 'Data berhasil diupdate!'),
+                                backgroundColor: result['success'] ? Colors.green : Colors.red,
+                              ),
+                            );
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.blue,
+                            padding: EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                          ),
+                          child: Text(
+                            'Simpan Perubahan',
+                            style: GoogleFonts.poppins(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        // Tombol Logout
+                        ElevatedButton(
+                          onPressed: () async {
+                            // Logika logout
+                            await _authService.logout(context);
+                            Navigator.pushAndRemoveUntil(
+                              context,
+                              MaterialPageRoute(builder: (context) => LoginOrganisasi()),
+                              (route) => false,
+                            );
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.red,
+                            padding: EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                          ),
+                          child: Text(
+                            'Logout',
+                            style: GoogleFonts.poppins(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
               ),
-              SizedBox(height: 24),
-              _buildTextFieldLabel('Nama Organisasi'),
-              _buildTextField(
-                icon: Icons.group,
-                hint: 'Masukkan nama organisasi',
-              ),
-              SizedBox(height: 16),
-              _buildTextFieldLabel('Alamat E-Mail Organisasi'),
-              _buildTextField(
-                icon: Icons.email,
-                hint: 'Masukkan email organisasi',
-              ),
-              SizedBox(height: 16),
-              _buildTextFieldLabel('Kota Domisili Organisasi'),
-              DropdownButtonFormField<String>(
-                items: ['Jakarta', 'Bandung', 'Surabaya']
-                    .map((city) => DropdownMenuItem<String>(
-                          value: city,
-                          child: Text(
-                            city,
-                            style: GoogleFonts.poppins(),
-                          ),
-                        ))
-                    .toList(),
-                onChanged: (value) {},
-                decoration: InputDecoration(
-                  prefixIcon: Icon(Icons.location_city),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
+            ),
+            // Bottom Navigation Bar
+            bottomNavigationBar: BottomNavigationBar(
+              type: BottomNavigationBarType.fixed,
+              selectedItemColor: Colors.blue,
+              unselectedItemColor: Colors.grey,
+              currentIndex: 3, // Set index untuk halaman profil
+              items: const [
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.home),
+                  label: 'Beranda',
                 ),
-              ),
-              SizedBox(height: 16),
-              _buildTextFieldLabel('Nomor Telepon Organisasi'),
-              _buildTextField(
-                icon: Icons.phone,
-                prefix: '+62',
-                hint: 'Masukkan nomor telepon',
-              ),
-              SizedBox(height: 16),
-              _buildTextFieldLabel('Deskripsi Organisasi'),
-              _buildTextField(
-                icon: Icons.description,
-                hint: 'Masukkan deskripsi singkat organisasi',
-                maxLines: 3,
-              ),
-              SizedBox(height: 32),
-              Text(
-                'Penanggung Jawab Organisasi',
-                style: GoogleFonts.poppins(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.message),
+                  label: 'Pesan',
                 ),
-              ),
-              SizedBox(height: 16),
-              _buildTextFieldLabel('Nama Lengkap'),
-              _buildTextField(
-                icon: Icons.person,
-                hint: 'Masukkan nama lengkap',
-              ),
-              SizedBox(height: 16),
-              _buildTextFieldLabel('Jabatan'),
-              _buildTextField(
-                icon: Icons.work,
-                hint: 'Masukkan jabatan',
-              ),
-              SizedBox(height: 16),
-              _buildTextFieldLabel('Alamat E-Mail'),
-              _buildTextField(
-                icon: Icons.email,
-                hint: 'Masukkan email',
-              ),
-              SizedBox(height: 16),
-              _buildTextFieldLabel('Alamat Lengkap'),
-              _buildTextField(
-                icon: Icons.location_on,
-                hint: 'Masukkan alamat lengkap',
-              ),
-            ],
-          ),
-        ),
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        items: [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Beranda',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.message),
-            label: 'Pesan',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.history),
-            label: 'Riwayat',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Profil',
-          ),
-        ],
-        currentIndex: 3,
-        selectedItemColor: Colors.blue,
-        unselectedItemColor: Colors.grey,
-      ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.history),
+                  label: 'Riwayat',
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.person),
+                  label: 'Profil',
+                ),
+              ],
+              onTap: (index) {
+                // Handle item tap
+                switch (index) {
+                  case 0:
+                    // Navigasi ke Beranda
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => DashboardOrganisasi()),
+                    );
+                    break;
+                  case 1:
+                    // Navigasi ke Pesan
+                    Navigator.pushReplacementNamed(context, '/pesan');
+                    break;
+                  case 2:
+                    // Navigasi ke Riwayat
+                    Navigator.pushReplacementNamed(context, '/riwayat');
+                    break;
+                  case 3:
+                    // Navigasi ke Profil (tidak perlu navigasi karena sudah di halaman profil)
+                    break;
+                }
+              },
+            ),
+          );
+        }
+      },
     );
   }
 
@@ -167,12 +318,10 @@ class ProfileOrganisasiPage extends StatelessWidget {
     required IconData icon,
     String? prefix,
     String? hint,
-    int maxLines = 1,
-    bool obscureText = false,
+    TextEditingController? controller,
   }) {
     return TextFormField(
-      obscureText: obscureText,
-      maxLines: maxLines,
+      controller: controller,
       decoration: InputDecoration(
         prefixIcon: Icon(icon),
         prefix: prefix != null

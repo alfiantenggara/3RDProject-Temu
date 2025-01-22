@@ -1,211 +1,344 @@
 import 'package:flutter/material.dart';
+import 'package:frontendtemu/loginorganisasi.dart';
+import 'package:frontendtemu/profileorganisasi.dart';
+import 'package:frontendtemu/service/auth_service.dart';
+import 'package:frontendtemu/service/perusahaan_service.dart'; // Import service perusahaan
 
-theme() {
-  return MaterialApp(
-    debugShowCheckedModeBanner: false,
-    home: DashboardOrganisasi(),
-  );
+class DashboardOrganisasi extends StatefulWidget {
+  @override
+  _DashboardOrganisasiState createState() => _DashboardOrganisasiState();
 }
 
-class DashboardOrganisasi extends StatelessWidget {
+class _DashboardOrganisasiState extends State<DashboardOrganisasi> {
+  TextEditingController searchController = TextEditingController();
+  String keywordSearch = ''; // Variable buat nyimpen keyword search
+  late Future<Map<dynamic, dynamic>>
+      perusahaanList; // Kita bikin list perusahaan sebagai Future
+
+  @override
+  void initState() {
+    super.initState();
+    // Initial load perusahaan
+    perusahaanList = PerusahaanService().getAllPerusahaan(context);
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Color(0xFFDED0CE),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                child: Text(
-                  "Dashboard Organisasi",
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
+    return FutureBuilder(
+      future: AuthService().getUserData(context),
+      builder: (context, userSnapshot) {
+        if (userSnapshot.connectionState == ConnectionState.waiting) {
+          return Scaffold(
+            backgroundColor: Color(0xFFDED0CE),
+            body: Center(child: CircularProgressIndicator()),
+          );
+        } else if (userSnapshot.hasError) {
+          return Scaffold(
+            backgroundColor: Color(0xFFDED0CE),
+            body: Center(
+                child: Text('Error loading data: ${userSnapshot.error}')),
+          );
+        } else {
+          final userData = userSnapshot.data as Map<dynamic, dynamic>?;
+          if (userData == null || userData['success'] == false) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(builder: (context) => LoginOrganisasi()),
+                (route) => false,
+              );
+            });
+            return SizedBox();
+          }
+
+          final String namaOrganisasi =
+              userData['data']['namaOrganisasi'] ?? 'Organisasi';
+
+          return Scaffold(
+            backgroundColor: Color(0xFFDED0CE),
+            appBar: AppBar(
+              backgroundColor: Colors.transparent,
+              elevation: 0,
+              title: const Text(
+                'Dashboard Organisasi',
+                style: TextStyle(color: Colors.black),
+              ),
+              centerTitle: true,
+            ),
+            body: FutureBuilder(
+              future: perusahaanList,
+              builder: (context, perusahaanSnapshot) {
+                if (perusahaanSnapshot.connectionState ==
+                    ConnectionState.waiting) {
+                  return Center(child: CircularProgressIndicator());
+                } else if (perusahaanSnapshot.hasError) {
+                  return Center(
+                      child: Text(
+                          'Error loading perusahaan: ${perusahaanSnapshot.error}'));
+                } else {
+                  final resultPerusahaan =
+                      perusahaanSnapshot.data as Map<dynamic, dynamic>;
+                  final perusahaanListData = resultPerusahaan['data'] ?? [];
+                  return SingleChildScrollView(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(16.0),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text(
+                                  'Perusahaan Tersedia',
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  "Hi, $namaOrganisasi!\nYuk kita lihat perusahaan mana yang cocok buat kamu!",
+                                  style: TextStyle(fontSize: 14),
+                                ),
+                                const SizedBox(height: 16),
+                                TextField(
+                                  controller: searchController,
+                                  onSubmitted: (value) {
+                                    // Ketika Enter ditekan
+                                    _searchPerusahaan(value);
+                                  },
+                                  decoration: InputDecoration(
+                                    hintText: 'Cari',
+                                    prefixIcon: Icon(Icons.search),
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                      borderSide: BorderSide.none,
+                                    ),
+                                    filled: true,
+                                    fillColor: Colors.grey[200],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          Section(
+                            title: perusahaanListData.isNotEmpty
+                                ? 'Perusahaan Tersedia'
+                                : 'Tidak Ada Perusahaan',
+                            items: perusahaanListData
+                                .map<PerusahaanCard>((perusahaan) {
+                              return PerusahaanCard(
+                                name: perusahaan['namaperusahaan'] ??
+                                    'Nama Perusahaan Tidak Diketahui',
+                                location:
+                                    perusahaan['kotadomisiliperusahaan'] ??
+                                        'Kota Tidak Diketahui',
+                                phone: perusahaan['nomorteleponperusahaan'] ??
+                                    'Telepon Tidak Diketahui',
+                              );
+                            }).toList(),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                }
+              },
+            ),
+            bottomNavigationBar: BottomNavigationBar(
+              type: BottomNavigationBarType.fixed,
+              selectedItemColor: Colors.blue,
+              unselectedItemColor: Colors.grey,
+              items: const [
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.home),
+                  label: 'Beranda',
                 ),
-              ),
-              Container(
-                margin: EdgeInsets.symmetric(horizontal: 16.0),
-                padding: EdgeInsets.all(16.0),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(12.0),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.message),
+                  label: 'Pesan',
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "Perusahaan Tersedia",
-                      style: TextStyle(
-                        fontSize: 16.0,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    SizedBox(height: 8.0),
-                    Text(
-                      "Hi, KEHATI!",
-                      style: TextStyle(
-                        fontSize: 16.0,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    SizedBox(height: 4.0),
-                    Text(
-                      "Yuk lihat Perusahaan mana yang paling cocok dengan konsep acara Kamu!",
-                      style: TextStyle(
-                        fontSize: 14.0,
-                      ),
-                    ),
-                    SizedBox(height: 12.0),
-                    TextField(
-                      decoration: InputDecoration(
-                        prefixIcon: Icon(Icons.search),
-                        hintText: "Cari",
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8.0),
-                        ),
-                      ),
-                    ),
-                  ],
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.history),
+                  label: 'Riwayat',
                 ),
-              ),
-              SizedBox(height: 16.0),
-              SectionWidget(
-                title: "Sponsor Top 100 Bulan Ini",
-                items: [
-                  SponsorItem(name: "Astra", description: "PT Astra Internasional Tbk", events: "500 Event"),
-                  SponsorItem(name: "BRI", description: "PT Bank Rakyat Indonesia (Persero) Tbk", events: "350 Event"),
-                  SponsorItem(name: "Telkom", description: "PT Telkom Indonesia (Persero) Tbk", events: "200 Event"),
-                ],
-              ),
-              SectionWidget(
-                title: "Perusahaan di Sekitarmu",
-                items: [
-                  SponsorItem(name: "Astra", description: "PT Astra Internasional Tbk", events: "500 Event"),
-                  SponsorItem(name: "BRI", description: "PT Bank Rakyat Indonesia (Persero) Tbk", events: "350 Event"),
-                  SponsorItem(name: "Telkom", description: "PT Telkom Indonesia (Persero) Tbk", events: "200 Event"),
-                ],
-              ),
-            ],
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.person),
+                  label: 'Profil',
+                ),
+              ],
+              onTap: (index) {
+                // Handle item tap
+                switch (index) {
+                  case 0:
+                    // Home Page logic
+                    break;
+                  case 1:
+                    // Pesan logic
+                    break;
+                  case 2:
+                    // Riwayat logic
+                    break;
+                  case 3:
+                    // Navigasi ke ProfileOrganisasi
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => ProfileOrganisasiPage()),
+                    );
+                    break;
+                }
+              },
+            ),
+          );
+        }
+      },
+    );
+  }
+
+  // Fungsi untuk search perusahaan
+  Future<void> _searchPerusahaan(String keyword) async {
+    setState(() {
+      if (keyword.isEmpty) {
+        // Kalau keyword kosong, panggil getAllPerusahaan()
+        perusahaanList = PerusahaanService().getAllPerusahaan(context);
+      } else {
+        // Kalau ada keyword, panggil searchPerusahaan()
+        perusahaanList = PerusahaanService().searchPerusahaan(keyword, context);
+      }
+    });
+  }
+}
+
+class Section extends StatelessWidget {
+  final String title;
+  final List<PerusahaanCard> items;
+
+  const Section({required this.title, required this.items});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              title,
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        // Gunakan ListView dengan tinggi yang responsif
+        Container(
+          height: 190, // Tetap batasi tinggi
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            itemCount: items.length,
+            itemBuilder: (context, index) {
+              return items[index];
+            },
           ),
         ),
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        items: [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: "Beranda"),
-          BottomNavigationBarItem(icon: Icon(Icons.chat), label: "Pesan"),
-          BottomNavigationBarItem(icon: Icon(Icons.history), label: "Riwayat"),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profil"),
-        ],
-      ),
+      ],
     );
   }
 }
 
-class SectionWidget extends StatelessWidget {
-  final String title;
-  final List<SponsorItem> items;
-
-  SectionWidget({required this.title, required this.items});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                title,
-                style: TextStyle(
-                  fontSize: 16.0,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              Text(
-                "Lebih Lanjut",
-                style: TextStyle(
-                  color: Colors.blue,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: 12.0),
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: items
-                  .map(
-                    (item) => Padding(
-                      padding: const EdgeInsets.only(right: 8.0),
-                      child: ItemCard(item: item),
-                    ),
-                  )
-                  .toList(),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class SponsorItem {
+class PerusahaanCard extends StatelessWidget {
   final String name;
-  final String description;
-  final String events;
+  final String location;
+  final String phone;
 
-  SponsorItem({required this.name, required this.description, required this.events});
-}
-
-class ItemCard extends StatelessWidget {
-  final SponsorItem item;
-
-  ItemCard({required this.item});
+  const PerusahaanCard({
+    required this.name,
+    required this.location,
+    required this.phone,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 150.0,
+      margin: const EdgeInsets.only(right: 8),
+      width: 150,
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12.0),
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.2),
+            blurRadius: 5,
+            offset: const Offset(0, 3),
+          ),
+        ],
       ),
-      padding: EdgeInsets.all(8.0),
+      clipBehavior: Clip.hardEdge, // Tambahkan ini
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Image.asset("assets/GAMBAR4.png", height: 100.0, width: double.infinity, fit: BoxFit.cover),
-          SizedBox(height: 8.0),
-          Text(
-            item.name,
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
+          // Ikon dengan ukuran yang lebih kecil
+          ClipRRect(
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(12),
+              topRight: Radius.circular(12),
+            ),
+            child: Icon(
+              Icons.person,
+              size: 80, // Ukuran ikon dikurangi
+              color: Colors.grey[600],
             ),
           ),
-          SizedBox(height: 4.0),
-          Text(
-            item.description,
-            style: TextStyle(
-              fontSize: 12.0,
-              color: Colors.grey,
-            ),
-          ),
-          SizedBox(height: 4.0),
-          Text(
-            item.events,
-            style: TextStyle(
-              fontSize: 14.0,
-              fontWeight: FontWeight.bold,
-              color: Colors.blue,
+          // Gunakan Expanded untuk teks agar tidak overflow
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min, // Pastikan Column tidak mengambil ruang lebih
+                children: [
+                  // Nama Perusahaan
+                  Text(
+                    name,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 4),
+                  // Lokasi Perusahaan
+                  Text(
+                    location,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: Colors.grey,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 4),
+                  // Nomor Telepon
+                  Text(
+                    phone,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: Colors.grey,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
             ),
           ),
         ],

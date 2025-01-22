@@ -280,6 +280,87 @@ class AuthService {
     }
   }
 
+  Future<Map<dynamic, dynamic>> updateOrganisasiDanPenanggungJawab({
+    required BuildContext context,
+    required String namaOrganisasi,
+    required String kotaDomisiliOrganisasi,
+    required String nomorTeleponOrganisasi,
+    required String namaLengkapPenanggungJawab,
+    required String tanggalLahirPenanggungJawab,
+    required String alamatLengkapPenanggungJawab,
+    required String emailPenanggungJawab,
+  }) async {
+    try {
+      final token = await storage.read(key: 'auth_token');
+      if (token == null) {
+        throw Exception('Token tidak ditemukan');
+      }
+
+      // Update data organisasi
+      final organisasiResponse = await http.put(
+        Uri.parse('$baseURL/organisasi'), // Endpoint update organisasi
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode({
+          'namaorganisasi': namaOrganisasi,
+          'kotadomisiliorganisasi': kotaDomisiliOrganisasi,
+          'nomorteleponorganisasi': nomorTeleponOrganisasi,
+        }),
+      );
+
+      print("Organisasi Response status: ${organisasiResponse.statusCode}");
+      print("Organisasi Response body: ${organisasiResponse.body}");
+
+      if (organisasiResponse.statusCode != 200) {
+        return {
+          'success': false,
+          'message': 'Gagal mengupdate data organisasi.',
+        };
+      }
+
+      // Update data penanggung jawab
+      final penanggungJawabResponse = await http.put(
+        Uri.parse('$baseURL/penanggungjawaborganisasi'), // Endpoint update penanggung jawab
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode({
+          'namaLengkapPenanggungJawab': namaLengkapPenanggungJawab,
+          'tanggalLahirPenanggungJawab': tanggalLahirPenanggungJawab,
+          'alamatLengkapPenanggungJawab': alamatLengkapPenanggungJawab,
+          'emailPenanggungJawab': emailPenanggungJawab,
+        }),
+      );
+
+      print("Penanggung Jawab Response status: ${penanggungJawabResponse.statusCode}");
+      print("Penanggung Jawab Response body: ${penanggungJawabResponse.body}");
+
+      if (penanggungJawabResponse.statusCode != 200) {
+        return {
+          'success': false,
+          'message': 'Gagal mengupdate data penanggung jawab.',
+        };
+      }
+
+      // Jika kedua request berhasil
+      return {
+        'success': true,
+        'message': 'Data organisasi dan penanggung jawab berhasil diupdate.',
+      };
+    } catch (e) {
+      print("Error occurred during update: $e");
+      return {
+        'success': false,
+        'message': 'Terjadi kesalahan. Periksa koneksi Anda.',
+      };
+    }
+  }
+
   // Register function
   Future<Map<dynamic, dynamic>> register_perusahaan(
       String email,

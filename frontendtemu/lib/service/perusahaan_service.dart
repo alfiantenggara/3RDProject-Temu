@@ -7,10 +7,10 @@ import 'package:frontendtemu/service/consts.dart';
 // Initialize the storage for secure token storage
 final storage = FlutterSecureStorage();
 
-const baseURL = hostURL + '/acara';
+const baseURL = hostURL + '/perusahaan';
 
-class AcaraService {
-  Future<Map<dynamic, dynamic>> getAllAcara(BuildContext context) async {
+class PerusahaanService {
+  Future<Map<dynamic, dynamic>> getAllPerusahaan(BuildContext context) async {
     final url = Uri.parse(baseURL);
 
     try {
@@ -43,7 +43,7 @@ class AcaraService {
         };
       }
     } catch (e) {
-      print("Error occurred during get Acara: $e");
+      print("Error occurred during get all perusahaan: $e");
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('An error occurred, please try again')),
       );
@@ -54,7 +54,7 @@ class AcaraService {
     }
   }
 
-  Future<Map<dynamic, dynamic>> searchAcara(String keyword, BuildContext context) async {
+  Future<Map<dynamic, dynamic>> searchPerusahaan(String keyword, BuildContext context) async {
     final url = Uri.parse(baseURL + '/search/' + keyword);
 
     try {
