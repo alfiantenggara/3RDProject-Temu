@@ -297,6 +297,7 @@ class PerusahaanCard extends StatelessWidget {
                 location: data['kotadomisiliperusahaan'],
                 phone: data['nomorteleponperusahaan'],
                 email: data['emailperusahaan'],
+                idPerusahaan: data['id_user'].toString()
               ),
             ),
           );
