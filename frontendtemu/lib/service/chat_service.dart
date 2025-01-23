@@ -7,11 +7,11 @@ import 'package:frontendtemu/service/consts.dart';
 // Initialize the storage for secure token storage
 final storage = FlutterSecureStorage();
 
-const baseURL = hostURL + '/acara';
+const baseURL = hostURL + '/chat';
 
-class AcaraService {
-  Future<Map<dynamic, dynamic>> getAllAcara(BuildContext context) async {
-    final url = Uri.parse(baseURL + '/getIncoming');
+class ChatService {
+  Future<Map<dynamic, dynamic>> getAll(BuildContext context) async {
+    final url = Uri.parse(baseURL);
 
     try {
       final token = await storage.read(key: 'auth_token');
@@ -43,7 +43,7 @@ class AcaraService {
         };
       }
     } catch (e) {
-      print("Error occurred during get Acara: $e");
+      print("Error occurred during get Chat: $e");
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('An error occurred, please try again')),
       );
@@ -54,8 +54,9 @@ class AcaraService {
     }
   }
 
-  Future<Map<dynamic, dynamic>> searchAcara(String keyword, BuildContext context) async {
-    final url = Uri.parse(baseURL + '/search/' + keyword);
+  Future<Map<dynamic, dynamic>> getMessages(
+      String idChat, BuildContext context) async {
+    final url = Uri.parse(baseURL + '/' + idChat);
 
     try {
       final token = await storage.read(key: 'auth_token');
@@ -87,7 +88,55 @@ class AcaraService {
         };
       }
     } catch (e) {
-      print("Error occurred during search: $e");
+      print("Error occurred during get Chat: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('An error occurred, please try again')),
+      );
+      return {
+        'success': false,
+        'message': 'Terjadi kesalahan. Periksa koneksi Anda.'
+      };
+    }
+  }
+
+  Future<Map<dynamic, dynamic>> sendMessage(
+      String idPenerima, String message, BuildContext context) async {
+    final url = Uri.parse(baseURL + '/' + idPenerima);
+
+    try {
+      final token = await storage.read(key: 'auth_token');
+      final response = await http.post(url,
+          headers: {
+            'Content-Type': 'application/json',
+            "Accept": "application/json",
+            "Authorization": "Bearer $token"
+          },
+          body: jsonEncode({'isiPesan': message}));
+      print("Sending message to: " + idPenerima);
+
+      print("Response status: ${response.statusCode}");
+      print("Response body: ${response.body}");
+
+      final responseData = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        if (token != null) {
+          return {
+            'success': true,
+            'message': responseData['message'],
+            'data': responseData['data']
+          };
+        } else {
+          print("No token found in the response");
+          throw Exception("Invalid token received from the server");
+        }
+      } else {
+        return {
+          'success': false,
+          'message': 'Terjadi kesalahan. Periksa koneksi Anda.'
+        };
+      }
+    } catch (e) {
+      print("Error occurred during get Chat: $e");
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('An error occurred, please try again')),
       );

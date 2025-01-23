@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:frontendtemu/service/auth_service.dart';
 import 'package:frontendtemu/loginorganisasi.dart';
 import 'package:frontendtemu/dashboardorganisasi.dart';
+import 'package:frontendtemu/chatOrganisasi/chat.dart';
 
 class ProfileOrganisasiPage extends StatefulWidget {
   @override
@@ -255,7 +256,7 @@ class _ProfileOrganisasiPageState extends State<ProfileOrganisasiPage> {
               type: BottomNavigationBarType.fixed,
               selectedItemColor: Colors.blue,
               unselectedItemColor: Colors.grey,
-              currentIndex: 3, // Set index untuk halaman profil
+              currentIndex: 2, // Set index untuk halaman profil
               items: const [
                 BottomNavigationBarItem(
                   icon: Icon(Icons.home),
@@ -283,7 +284,11 @@ class _ProfileOrganisasiPageState extends State<ProfileOrganisasiPage> {
                     break;
                   case 1:
                     // Navigasi ke Pesan
-                    Navigator.pushReplacementNamed(context, '/pesan');
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => ListPesanPage()),
+                    );
                     break;
                   case 2:
                     // Navigasi ke Profil (tidak perlu navigasi karena sudah di halaman profil)

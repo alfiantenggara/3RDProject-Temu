@@ -3,6 +3,7 @@ import 'package:frontendtemu/loginperusahaan.dart';
 import 'package:frontendtemu/profileperusahaan.dart';
 import 'package:frontendtemu/service/auth_service.dart';
 import 'package:frontendtemu/service/acara_service.dart';
+import 'package:frontendtemu/chatPerusahaan/chat.dart';
 import 'dart:convert';
 
 class DashboardPerusahaan extends StatefulWidget {
@@ -180,7 +181,11 @@ class _DashboardPerusahaanState extends State<DashboardPerusahaan> {
                     // Home Page logic
                     break;
                   case 1:
-                    // Pesan logic
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => ListPesanPage()),
+                    );
                     break;
                   case 2:
                     // Navigasi ke ProfilePerusahaan

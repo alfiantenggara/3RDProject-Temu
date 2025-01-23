@@ -3,7 +3,7 @@ import 'package:frontendtemu/loginorganisasi.dart';
 import 'package:frontendtemu/profileorganisasi.dart';
 import 'package:frontendtemu/service/auth_service.dart';
 import 'package:frontendtemu/service/perusahaan_service.dart';
-import 'package:frontendtemu/chat.dart'; // Import halaman list pesan
+import 'package:frontendtemu/chatOrganisasi/chat.dart'; // Import halaman list pesan
 
 class DashboardOrganisasi extends StatefulWidget {
   @override
@@ -58,6 +58,7 @@ class _DashboardOrganisasiState extends State<DashboardOrganisasi> {
             appBar: AppBar(
               backgroundColor: Colors.transparent,
               elevation: 0,
+              automaticallyImplyLeading: false, // Hilangkan tombol back
               title: const Text(
                 'Dashboard Organisasi',
                 style: TextStyle(color: Colors.black),
@@ -172,11 +173,16 @@ class _DashboardOrganisasiState extends State<DashboardOrganisasi> {
                 // Handle item tap
                 switch (index) {
                   case 0:
-                    // Home Page logic
+                    // Navigasi ke Beranda
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => DashboardOrganisasi()),
+                    );
                     break;
                   case 1:
                     // Navigasi ke ListPesanPage
-                    Navigator.push(
+                    Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(
                           builder: (context) => ListPesanPage()),
@@ -184,7 +190,7 @@ class _DashboardOrganisasiState extends State<DashboardOrganisasi> {
                     break;
                   case 2:
                     // Navigasi ke ProfileOrganisasi
-                    Navigator.push(
+                    Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(
                           builder: (context) => ProfileOrganisasiPage()),

@@ -39,14 +39,10 @@ class AuthService {
       final responseData = jsonDecode(response.body)['data'];
       if (response.statusCode == 200) {
         final token = responseData['token'];
-        final userName = responseData['level'] == "perusahaan"
-            ? responseData['namaperusahaan']
-            : responseData['namaorganisasi'];
 
         if (token != null) {
           // Save token securely
           await storage.write(key: 'auth_token', value: token);
-          await storage.write(key: 'user_name', value: userName);
           print("Token saved successfully: $token");
 
           // Redirect to HomeScreen on successful login
@@ -89,9 +85,11 @@ class AuthService {
       final token = await storage.read(key: 'auth_token');
       final response = await http.post(
         url,
-        headers: {'Content-Type': 'application/json',
-        "Accept": "application/json",
-        "Authorization": "Bearer $token"},
+        headers: {
+          'Content-Type': 'application/json',
+          "Accept": "application/json",
+          "Authorization": "Bearer $token"
+        },
       );
 
       print("Response status: ${response.statusCode}");
@@ -101,19 +99,21 @@ class AuthService {
       if (response.statusCode == 200) {
         final level = responseData['level'];
 
-          storage.delete(key: 'auth_token');
+        storage.delete(key: 'auth_token');
 
-          // Redirect to HomeScreen on successful login
-          if (level == "perusahaan") {
-            Navigator.pushReplacementNamed(context, '/loginperusahaan');
-          } else {
-            Navigator.pushReplacementNamed(context, '/loginorganisasi');
-          }
-          return true;
+        // Redirect to HomeScreen on successful login
+        if (level == "perusahaan") {
+          Navigator.pushReplacement(context,
+              MaterialPageRoute(builder: (context) => LoginPerusahaan()));
         } else {
-          print("No token found in the response");
-          throw Exception("Invalid token received from the server");
+          Navigator.pushReplacement(context,
+              MaterialPageRoute(builder: (context) => LoginOrganisasi()));
         }
+        return true;
+      } else {
+        print("No token found in the response");
+        throw Exception("Invalid token received from the server");
+      }
     } catch (e) {
       print("Error occurred during logout: $e");
       ScaffoldMessenger.of(context).showSnackBar(
@@ -242,7 +242,8 @@ class AuthService {
 
       // Update data penanggung jawab
       final penanggungJawabResponse = await http.put(
-        Uri.parse('$baseURL/penanggungjawabperusahaan'), // Endpoint update penanggung jawab
+        Uri.parse(
+            '$baseURL/penanggungjawabperusahaan'), // Endpoint update penanggung jawab
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
@@ -256,7 +257,8 @@ class AuthService {
         }),
       );
 
-      print("Penanggung Jawab Response status: ${penanggungJawabResponse.statusCode}");
+      print(
+          "Penanggung Jawab Response status: ${penanggungJawabResponse.statusCode}");
       print("Penanggung Jawab Response body: ${penanggungJawabResponse.body}");
 
       if (penanggungJawabResponse.statusCode != 200) {
@@ -323,7 +325,8 @@ class AuthService {
 
       // Update data penanggung jawab
       final penanggungJawabResponse = await http.put(
-        Uri.parse('$baseURL/penanggungjawaborganisasi'), // Endpoint update penanggung jawab
+        Uri.parse(
+            '$baseURL/penanggungjawaborganisasi'), // Endpoint update penanggung jawab
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
@@ -337,7 +340,8 @@ class AuthService {
         }),
       );
 
-      print("Penanggung Jawab Response status: ${penanggungJawabResponse.statusCode}");
+      print(
+          "Penanggung Jawab Response status: ${penanggungJawabResponse.statusCode}");
       print("Penanggung Jawab Response body: ${penanggungJawabResponse.body}");
 
       if (penanggungJawabResponse.statusCode != 200) {
@@ -428,7 +432,7 @@ class AuthService {
     }
   }
 
-  Future<Map<String, dynamic>> register_organisasi(
+  Future<Map<dynamic, dynamic>> register_organisasi(
       String email,
       String namaOrganisasi,
       String kotaDomisiliOrganisasi,
@@ -493,5 +497,4 @@ class AuthService {
       };
     }
   }
-
 }
