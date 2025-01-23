@@ -1,5 +1,5 @@
 name: frontendtemu
-description: "A new Flutter project."
+description: "TEMU, Your Number One Option For Partnerships"
 publish_to: 'none'
 
 version: 1.0.0+1
@@ -27,6 +27,7 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^4.0.0
+  flutter_launcher_icons: ^0.13.1
 
 flutter:
   uses-material-design: true
@@ -35,3 +36,8 @@ flutter:
     - assets/GAMBAR2.json
     - assets/GAMBAR3.json
     - assets/GAMBAR4.jpg
+  
+flutter_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/TEMU.png"

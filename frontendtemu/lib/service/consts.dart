@@ -1,3 +1,3 @@
-const host = '127.0.0.1';
-const port = '8000';
+const host = '192.168.133.147';
+const port = '8190';
 const hostURL = 'http://' + host + ':' + port + '/api';

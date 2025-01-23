@@ -128,6 +128,7 @@ class ListPesanPage extends StatelessWidget {
               type: BottomNavigationBarType.fixed,
               selectedItemColor: Colors.blue,
               unselectedItemColor: Colors.grey,
+              currentIndex: 1,
               items: const [
                 BottomNavigationBarItem(
                   icon: Icon(Icons.home),

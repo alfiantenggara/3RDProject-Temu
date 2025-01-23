@@ -85,7 +85,7 @@ class _LoginPerusahaanState extends State<LoginPerusahaan> {
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Email tidak boleh kosong';
+                    // return 'Email tidak boleh kosong';
                   }
                   return null;
                 },
@@ -116,7 +116,7 @@ class _LoginPerusahaanState extends State<LoginPerusahaan> {
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Kata sandi tidak boleh kosong';
+                        // return 'Kata sandi tidak boleh kosong';
                       }
                       return null;
                     },

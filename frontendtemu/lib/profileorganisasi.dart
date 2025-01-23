@@ -257,6 +257,7 @@ class _ProfileOrganisasiPageState extends State<ProfileOrganisasiPage> {
               type: BottomNavigationBarType.fixed,
               selectedItemColor: Colors.blue,
               unselectedItemColor: Colors.grey,
+              currentIndex: 3,
               items: const [
                 BottomNavigationBarItem(
                   icon: Icon(Icons.home),

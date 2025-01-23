@@ -54,30 +54,60 @@ class _OnboardingPageState extends State<OnboardingPage> {
   ];
 
   @override
-  void initState() {
-    super.initState();
-    getSession();
-  }
+void initState() {
+  super.initState();
+  _checkSession();
+}
 
-  @override
-  Widget build(BuildContext context) {
-    if (!_isSessionLoaded) {
-      // Tampilkan loading dulu
-      return Scaffold(
-        body: Center(
-          child: CircularProgressIndicator(),
+void _checkSession() async {
+  await Future.delayed(Duration(seconds: 3));
+  await getSession();
+  if (_userLevel != null) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_userLevel == "perusahaan") {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => DashboardPerusahaan()),
+        );
+      } else if (_userLevel == "organisasi") {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => DashboardOrganisasi()),
+        );
+      }
+    });
+  }
+}
+
+@override
+Widget build(BuildContext context) {
+  if (!_isSessionLoaded) {
+    return Scaffold(
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Color(0xFF4FC3F7),
+              Color(0xFF4C81B7),
+              Color(0xFF4171B9),
+            ],
+          ),
         ),
-      );
-    }
-
-    if (_userLevel == "perusahaan") {
-      return DashboardPerusahaan();
-    } else if (_userLevel == "organisasi") {
-      return DashboardOrganisasi();
-    }
-    // Default ke buildPage
-    return buildPage(context);
+        child: Center(
+          child: Image.asset(
+            'assets/TEMU.png',
+            width: 200,
+          ),
+        ),
+      ),
+    );
   }
+
+  return buildPage(context);
+}
+
 
   Widget buildPage(BuildContext context) {
     return Scaffold(
