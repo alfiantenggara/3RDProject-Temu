@@ -64,9 +64,6 @@ class _BeriUangPageState extends State<BeriUangPage> {
 
   void navigateToPaymentBill() {
     if (eventId.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Harap masukkan ID acara')),
-      );
       return;
     }
 
