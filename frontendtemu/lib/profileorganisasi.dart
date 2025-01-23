@@ -4,6 +4,7 @@ import 'package:frontendtemu/service/auth_service.dart';
 import 'package:frontendtemu/loginorganisasi.dart';
 import 'package:frontendtemu/dashboardorganisasi.dart';
 import 'package:frontendtemu/chatOrganisasi/chat.dart';
+import 'package:frontendtemu/penarikan.dart';
 
 class ProfileOrganisasiPage extends StatefulWidget {
   @override
@@ -256,7 +257,6 @@ class _ProfileOrganisasiPageState extends State<ProfileOrganisasiPage> {
               type: BottomNavigationBarType.fixed,
               selectedItemColor: Colors.blue,
               unselectedItemColor: Colors.grey,
-              currentIndex: 2, // Set index untuk halaman profil
               items: const [
                 BottomNavigationBarItem(
                   icon: Icon(Icons.home),
@@ -265,6 +265,9 @@ class _ProfileOrganisasiPageState extends State<ProfileOrganisasiPage> {
                 BottomNavigationBarItem(
                   icon: Icon(Icons.message),
                   label: 'Pesan',
+                ),BottomNavigationBarItem(
+                  icon: Icon(Icons.money),
+                  label: 'Penarikan',
                 ),
                 BottomNavigationBarItem(
                   icon: Icon(Icons.person),
@@ -276,22 +279,31 @@ class _ProfileOrganisasiPageState extends State<ProfileOrganisasiPage> {
                 switch (index) {
                   case 0:
                     // Navigasi ke Beranda
-                    Navigator.push(
+                    Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(
                           builder: (context) => DashboardOrganisasi()),
                     );
                     break;
                   case 1:
-                    // Navigasi ke Pesan
-                    Navigator.push(
+                    // Navigasi ke ListPesanPage
+                    Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(
                           builder: (context) => ListPesanPage()),
                     );
                     break;
-                  case 2:
-                    // Navigasi ke Profil (tidak perlu navigasi karena sudah di halaman profil)
+                  case 3:
+                    // Navigasi ke ProfileOrganisasi
+                    break;
+
+                    case 2:
+                    // Navigasi ke Penarikan
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => PenarikanPage()),
+                    );
                     break;
                 }
               },

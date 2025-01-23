@@ -3,6 +3,7 @@ import 'package:frontendtemu/dashboardorganisasi.dart';
 import 'package:frontendtemu/profileorganisasi.dart';
 import 'package:frontendtemu/service/chat_service.dart';
 import 'package:frontendtemu/chat_model.dart';
+import 'package:frontendtemu/penarikan.dart';
 import 'package:frontendtemu/chatOrganisasi/chat_detail_page.dart';
 
 class ListPesanPage extends StatelessWidget {
@@ -124,49 +125,61 @@ class ListPesanPage extends StatelessWidget {
         },
       ),
       bottomNavigationBar: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        selectedItemColor: Colors.blue,
-        unselectedItemColor: Colors.grey,
-        currentIndex: 1, // Set index untuk halaman pesan
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Beranda',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.message),
-            label: 'Pesan',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Profil',
-          ),
-        ],
-        onTap: (index) {
-          // Handle item tap
-          switch (index) {
-            case 0:
-              // Navigasi ke Beranda
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => DashboardOrganisasi()),
-              );
-              break;
-            case 1:
-              // Navigasi ke Pesan (tidak perlu navigasi karena sudah di halaman pesan)
-              break;
-            case 2:
-              // Navigasi ke Profil
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => ProfileOrganisasiPage()),
-              );
-              break;
-          }
-        },
-      ),
+              type: BottomNavigationBarType.fixed,
+              selectedItemColor: Colors.blue,
+              unselectedItemColor: Colors.grey,
+              items: const [
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.home),
+                  label: 'Beranda',
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.message),
+                  label: 'Pesan',
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.money),
+                  label: 'Penarikan',
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.person),
+                  label: 'Profil',
+                ),
+              ],
+              onTap: (index) {
+                // Handle item tap
+                switch (index) {
+                  case 0:
+                    // Navigasi ke Beranda
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => DashboardOrganisasi()),
+                    );
+                    break;
+                  case 1:
+                    // Navigasi ke ListPesanPage
+                    break;
+                  case 3:
+                    // Navigasi ke ProfileOrganisasi
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => ProfileOrganisasiPage()),
+                    );
+                    break;
+
+                    case 2:
+                    // Navigasi ke Penarikan
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => PenarikanPage()),
+                    );
+                    break;
+                }
+              },
+            ),
     );
   }
 }

@@ -1,46 +1,112 @@
 import 'package:flutter/material.dart';
-import 'acara.dart';
-import 'package:intl/intl.dart';
-import 'beriuang.dart';
+import 'package:frontendtemu/service/acara_service.dart'; // Import service acara
+import 'package:intl/intl.dart'; // Untuk format tanggal
+import 'dart:convert'; // Untuk decode base64
+import 'package:frontendtemu/chatPerusahaan/chat_detail_page.dart'; // Import layar chat detail
+import 'package:frontendtemu/chat_model.dart'; // Import model chat
+import 'beriuang.dart'; // Import layar beri uang
+import 'package:frontendtemu/service/chat_service.dart'; // Import service chat
 
 class DetailPageAcara extends StatefulWidget {
-  final Acara acara;
+  final String acaraId; // Terima ID acara
 
-  const DetailPageAcara({Key? key, required this.acara}) : super(key: key);
+  const DetailPageAcara({Key? key, required this.acaraId}) : super(key: key);
 
   @override
   State<DetailPageAcara> createState() => DetailPageAcaraState();
 }
 
 class DetailPageAcaraState extends State<DetailPageAcara> {
-  late Acara acara;
   bool isFavorited = false;
   bool isShared = false;
+  int? idOrganisasi; // Simpan idOrganisasi di sini
+  Map<String, dynamic>? acara; // Simpan data acara di sini
+  bool isLoading = true; // Untuk menangani loading state
 
   @override
   void initState() {
     super.initState();
-    acara = widget.acara;
+    // Ambil detail acara berdasarkan ID
+    _fetchAcaraData();
+  }
+
+  // Fungsi untuk mengambil data acara
+  Future<void> _fetchAcaraData() async {
+    try {
+      final response = await AcaraService().getById(widget.acaraId, context);
+      if (response['success'] == true) {
+        setState(() {
+          acara = response['data'][0]; // Simpan data acara
+          idOrganisasi = int.parse(acara!['organisasi']['id_organisasi'].toString()); // Setel idOrganisasi
+          isLoading = false; // Tandai loading selesai
+        });
+      } else {
+        throw Exception('Gagal mengambil data acara');
+      }
+    } catch (e) {
+      setState(() {
+        isLoading = false; // Tandai loading selesai
+      });
+    }
+  }
+
+  // Fungsi untuk membuka layar chat
+  Future<void> _openChat(BuildContext context, int idOrganisasi) async {
+    try {
+      // Ambil data chat menggunakan endpoint getIdChatByTemanChat
+      final response = await ChatService().getIdChatByTemanChat(idOrganisasi.toString(), context);
+      if (response['success'] == true) {
+        final dataChat = response['data']['dataChat'] as List; // Ambil data chat
+        final idChat = response['data']['id_chat']; // Ambil idChat
+        final namaTemanChat = response['data']['nama_teman_chat']; // Ambil nama teman chat
+
+        // Navigasi ke ChatDetailPage dengan data yang didapat
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ChatDetailPage(
+              chat: Chat(
+                idChat: idChat,
+                unreadCount: 0, // Default value, bisa disesuaikan
+                lastChat: dataChat.map((item) => LastChat.fromJson(item)).toList(),
+                dataTemanBicara: TemanBicara(
+                  id: idOrganisasi,
+                  nama: namaTemanChat,
+                ),
+              ),
+            ),
+          ),
+        );
+      } else {
+        throw Exception('Gagal mendapatkan data chat');
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: $e')),
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    String formattedDate = acara.tanggalAcara != null
-        ? DateFormat('dd MMM yyyy').format(acara.tanggalAcara!)
+    if (isLoading) {
+      return Center(child: CircularProgressIndicator());
+    }
+
+    if (acara == null) {
+      return Center(child: Text('Data acara tidak ditemukan.'));
+    }
+
+    // Format tanggal acara
+    String formattedDate = acara!['tanggal_acara'] != null
+        ? DateFormat('dd MMM yyyy').format(
+            DateTime.parse(acara!['tanggal_acara']),
+          )
         : 'Tanggal tidak tersedia';
-
-    String waktuMulai = acara.detailWaktu?.isNotEmpty == true
-        ? acara.detailWaktu![0].formatWaktu(acara.detailWaktu![0].waktuMulai)
-        : 'Tidak tersedia';
-
-    String waktuSelesai = acara.detailWaktu?.isNotEmpty == true
-        ? acara.detailWaktu![0].formatWaktu(acara.detailWaktu![0].waktuSelesai)
-        : 'Tidak tersedia';
 
     return Scaffold(
       body: CustomScrollView(
         slivers: [
-          // SliverAppBar with image and flexible space
           SliverAppBar(
             expandedHeight: MediaQuery.of(context).size.height * 0.6,
             backgroundColor: Colors.transparent,
@@ -54,7 +120,7 @@ class DetailPageAcaraState extends State<DetailPageAcara> {
                     context,
                     MaterialPageRoute(
                       builder: (context) => FullScreenImage(
-                        imageUrl: acara.gambarAcara ??
+                        imageUrl: acara!['poster_acara'] ??
                             'https://via.placeholder.com/600x400',
                       ),
                     ),
@@ -62,16 +128,12 @@ class DetailPageAcaraState extends State<DetailPageAcara> {
                 },
                 child: Stack(
                   children: [
-                    // Your image or background content
                     Positioned.fill(
-                      child: Image.network(
-                        acara.gambarAcara ??
-                            'https://via.placeholder.com/600x400',
+                      child: Image.memory(
+                        base64Decode(acara!['poster_acara']), // Decode base64
                         fit: BoxFit.cover,
                       ),
                     ),
-
-                    // Action buttons positioned at the top right
                     Positioned(
                       top: 16.0,
                       right: 16.0,
@@ -86,8 +148,7 @@ class DetailPageAcaraState extends State<DetailPageAcara> {
                             ),
                             onPressed: () {
                               setState(() {
-                                isFavorited =
-                                    !isFavorited; // Toggle state favorit
+                                isFavorited = !isFavorited;
                               });
                             },
                           ),
@@ -98,7 +159,7 @@ class DetailPageAcaraState extends State<DetailPageAcara> {
                             ),
                             onPressed: () {
                               setState(() {
-                                isShared = !isShared; // Toggle state share
+                                isShared = !isShared;
                               });
                             },
                           ),
@@ -110,32 +171,29 @@ class DetailPageAcaraState extends State<DetailPageAcara> {
               ),
             ),
           ),
-          // SliverFillRemaining to push the content to the top and leave space for the button
           SliverFillRemaining(
             hasScrollBody: false,
             child: Padding(
               padding: const EdgeInsets.all(16.0),
               child: Container(
                 decoration: BoxDecoration(
-                  color: Colors.white, // Background color for the container
-                  borderRadius:
-                      BorderRadius.circular(16), // Circular border radius
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
                   boxShadow: const [
                     BoxShadow(
-                      color: Colors.black26, // Shadow color
-                      blurRadius: 10, // Blur radius for the shadow
-                      offset: Offset(0, 4), // Position of the shadow
+                      color: Colors.black26,
+                      blurRadius: 10,
+                      offset: Offset(0, 4),
                     ),
                   ],
                 ),
                 child: Padding(
-                  padding: const EdgeInsets.all(
-                      16.0), // Padding inside the container
+                  padding: const EdgeInsets.all(16.0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        acara.namaAcara ?? 'Nama tidak tersedia',
+                        acara!['nama_acara'] ?? 'Nama tidak tersedia',
                         style: const TextStyle(
                           color: Colors.black,
                           fontSize: 24,
@@ -173,7 +231,7 @@ class DetailPageAcaraState extends State<DetailPageAcara> {
                           ),
                           const SizedBox(width: 4),
                           Text(
-                            acara.kotaBerlangsung ?? 'Lokasi tidak tersedia',
+                            acara!['kota_berlangsung'] ?? 'Lokasi tidak tersedia',
                             style: const TextStyle(
                               color: Colors.black,
                               fontSize: 16,
@@ -181,17 +239,7 @@ class DetailPageAcaraState extends State<DetailPageAcara> {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Jam: $waktuMulai - $waktuSelesai',
-                        style: const TextStyle(
-                          color: Colors.black,
-                          fontSize: 14,
-                        ),
-                      ),
-                      const SizedBox(
-                        height: 20,
-                      ),
+                      const SizedBox(height: 20),
                       const Text(
                         'Biaya Acara',
                         style: TextStyle(
@@ -202,32 +250,17 @@ class DetailPageAcaraState extends State<DetailPageAcara> {
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      const SizedBox(
-                        height: 10,
-                      ),
+                      const SizedBox(height: 10),
                       Text(
                         NumberFormat.currency(
                                 locale: 'id_ID',
                                 symbol: 'Rp ',
                                 decimalDigits: 0)
-                            .format(acara.biayaDibutuhkan),
+                            .format(acara!['biaya_dibutuhkan'] ?? 0),
                         style: const TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
                             color: Colors.black),
-                      ),
-                      const SizedBox(height: 10),
-                      const Text(
-                        'Tentang Acara',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Deskripsi tidak tersedia.',
-                        style: TextStyle(fontSize: 16, color: Colors.grey[600]),
                       ),
                       const SizedBox(height: 20),
                       const Text(
@@ -239,7 +272,7 @@ class DetailPageAcaraState extends State<DetailPageAcara> {
                       ),
                       const SizedBox(height: 10),
                       Text(
-                        acara.lokasiAcara ?? 'Lokasi tidak tersedia',
+                        acara!['lokasi_acara'] ?? 'Lokasi tidak tersedia',
                         style: TextStyle(fontSize: 16, color: Colors.grey[600]),
                       ),
                       const SizedBox(height: 20),
@@ -252,12 +285,10 @@ class DetailPageAcaraState extends State<DetailPageAcara> {
                       ),
                       const SizedBox(height: 10),
                       Text(
-                        acara.kegiatanAcara ?? 'Kegiatan tidak tersedia',
+                        acara!['kegiatan_acara'] ?? 'Kegiatan tidak tersedia',
                         style: TextStyle(fontSize: 16, color: Colors.grey[600]),
                       ),
-                      const SizedBox(
-                        height: 20,
-                      ),
+                      const SizedBox(height: 20),
                       const Text(
                         'Proposal Event',
                         style: TextStyle(
@@ -266,65 +297,30 @@ class DetailPageAcaraState extends State<DetailPageAcara> {
                         ),
                       ),
                       const SizedBox(height: 12),
-                      if (acara.proposalFile != null)
-                        Container(
-                          decoration: BoxDecoration(
-                            border: Border.all(color: Colors.grey.shade300),
-                            borderRadius: BorderRadius.circular(8),
-                            color: Colors.grey.shade50,
-                          ),
-                          child: ListTile(
-                            leading: Container(
-                              padding: const EdgeInsets.all(8),
-                              decoration: BoxDecoration(
-                                color: Colors.blue.shade100,
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Icon(
-                                acara.proposalFile!.endsWith('.pdf')
-                                    ? Icons.picture_as_pdf
-                                    : Icons.insert_drive_file,
-                                color: Colors.blue,
-                              ),
-                            ),
-                            title: Text(
-                              'Proposal Event.${acara.proposalFile!.split('.').last}',
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                            subtitle: const Text('Tap untuk membuka file'),
-                            trailing: const Icon(Icons.open_in_new),
-                            onTap: () {
-                              // Implement file opening logic here
-                            },
-                          ),
-                        )
-                      else
-                        Container(
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            border: Border.all(color: Colors.grey.shade300),
-                            borderRadius: BorderRadius.circular(8),
-                            color: Colors.grey.shade50,
-                          ),
-                          child: Row(
-                            children: [
-                              Icon(
-                                Icons.info_outline,
-                                color: Colors.grey[600],
-                              ),
-                              const SizedBox(width: 12),
-                              Text(
-                                'Proposal tidak tersedia',
-                                style: TextStyle(
-                                  color: Colors.grey[600],
-                                  fontSize: 16,
-                                ),
-                              ),
-                            ],
-                          ),
+                      Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.grey.shade300),
+                          borderRadius: BorderRadius.circular(8),
+                          color: Colors.grey.shade50,
                         ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.info_outline,
+                              color: Colors.grey[600],
+                            ),
+                            const SizedBox(width: 12),
+                            Text(
+                              'Proposal tidak tersedia',
+                              style: TextStyle(
+                                color: Colors.grey[600],
+                                fontSize: 16,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -338,12 +334,19 @@ class DetailPageAcaraState extends State<DetailPageAcara> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Tombol Chat
             ConstrainedBox(
-              constraints:
-                  BoxConstraints.tightFor(height: 60), // Tentukan tinggi tombol
+              constraints: BoxConstraints.tightFor(height: 60),
               child: ElevatedButton(
-                onPressed: () {},
+                onPressed: () {
+                  if (idOrganisasi != null) {
+                    // Buka layar chat dengan idOrganisasi
+                    _openChat(context, idOrganisasi!);
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('ID Organisasi tidak valid')),
+                    );
+                  }
+                },
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(horizontal: 30),
                   backgroundColor: Colors.green,
@@ -358,9 +361,7 @@ class DetailPageAcaraState extends State<DetailPageAcara> {
                       Icons.chat_outlined,
                       color: Colors.white,
                     ),
-                    SizedBox(
-                      height: 5,
-                    ),
+                    SizedBox(height: 5),
                     Text(
                       'Chat',
                       style: TextStyle(
@@ -372,13 +373,9 @@ class DetailPageAcaraState extends State<DetailPageAcara> {
                 ),
               ),
             ),
-            const SizedBox(
-              width: 10,
-            ),
-            // Tombol Sumbang Sekarang
+            const SizedBox(width: 10),
             ConstrainedBox(
-              constraints:
-                  BoxConstraints.tightFor(height: 60), // Tentukan tinggi tombol
+              constraints: BoxConstraints.tightFor(height: 60),
               child: ElevatedButton(
                 onPressed: () {
                   Navigator.push(
@@ -388,14 +385,14 @@ class DetailPageAcaraState extends State<DetailPageAcara> {
                   );
                 },
                 style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(horizontal: 100),
+                  padding: const EdgeInsets.symmetric(horizontal: 50),
                   backgroundColor: Colors.lightBlue,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
                 ),
                 child: const Text(
-                  'Sumbang Sekarang',
+                  'Donasi Acara Ini',
                   style: TextStyle(fontSize: 16, color: Colors.white),
                 ),
               ),

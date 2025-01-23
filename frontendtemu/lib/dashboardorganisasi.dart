@@ -4,6 +4,8 @@ import 'package:frontendtemu/profileorganisasi.dart';
 import 'package:frontendtemu/service/auth_service.dart';
 import 'package:frontendtemu/service/perusahaan_service.dart';
 import 'package:frontendtemu/chatOrganisasi/chat.dart'; // Import halaman list pesan
+import 'package:frontendtemu/penarikan.dart';
+import 'package:frontendtemu/detail_perusahaan.dart'; // Import halaman detail perusahaan
 
 class DashboardOrganisasi extends StatefulWidget {
   @override
@@ -134,6 +136,7 @@ class _DashboardOrganisasiState extends State<DashboardOrganisasi> {
                             items: perusahaanListData
                                 .map<PerusahaanCard>((perusahaan) {
                               return PerusahaanCard(
+                                idPerusahaan: perusahaan['id_user'].toString(), // Ubah ke String
                                 name: perusahaan['namaperusahaan'] ??
                                     'Nama Perusahaan Tidak Diketahui',
                                 location:
@@ -141,6 +144,8 @@ class _DashboardOrganisasiState extends State<DashboardOrganisasi> {
                                         'Kota Tidak Diketahui',
                                 phone: perusahaan['nomorteleponperusahaan'] ??
                                     'Telepon Tidak Diketahui',
+                                email: perusahaan['emailperusahaan'] ??
+                                    'Email Tidak Diketahui',
                               );
                             }).toList(),
                           ),
@@ -165,6 +170,10 @@ class _DashboardOrganisasiState extends State<DashboardOrganisasi> {
                   label: 'Pesan',
                 ),
                 BottomNavigationBarItem(
+                  icon: Icon(Icons.money),
+                  label: 'Penarikan',
+                ),
+                BottomNavigationBarItem(
                   icon: Icon(Icons.person),
                   label: 'Profil',
                 ),
@@ -174,11 +183,6 @@ class _DashboardOrganisasiState extends State<DashboardOrganisasi> {
                 switch (index) {
                   case 0:
                     // Navigasi ke Beranda
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => DashboardOrganisasi()),
-                    );
                     break;
                   case 1:
                     // Navigasi ke ListPesanPage
@@ -188,12 +192,20 @@ class _DashboardOrganisasiState extends State<DashboardOrganisasi> {
                           builder: (context) => ListPesanPage()),
                     );
                     break;
-                  case 2:
+                  case 3:
                     // Navigasi ke ProfileOrganisasi
                     Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(
                           builder: (context) => ProfileOrganisasiPage()),
+                    );
+                    break;
+                  case 2:
+                    // Navigasi ke Penarikan
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => PenarikanPage()),
                     );
                     break;
                 }
@@ -253,88 +265,118 @@ class Section extends StatelessWidget {
 }
 
 class PerusahaanCard extends StatelessWidget {
+  final String idPerusahaan; // Ubah tipe data ke String
   final String name;
   final String location;
   final String phone;
+  final String email;
 
   const PerusahaanCard({
+    required this.idPerusahaan, // Tipe data String
     required this.name,
     required this.location,
     required this.phone,
+    required this.email,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(right: 8),
-      width: 150,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.2),
-            blurRadius: 5,
-            offset: const Offset(0, 3),
-          ),
-        ],
-      ),
-      clipBehavior: Clip.hardEdge,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          ClipRRect(
-            borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(12),
-              topRight: Radius.circular(12),
-            ),
-            child: Icon(
-              Icons.person,
-              size: 80,
-              color: Colors.grey[600],
-            ),
-          ),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    name,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    location,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    phone,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
+    return InkWell(
+      onTap: () async {
+        // Ambil detail perusahaan berdasarkan ID
+        final perusahaanDetail =
+            await PerusahaanService().getById(idPerusahaan, context);
+
+        if (perusahaanDetail['success'] == true) {
+          final data = perusahaanDetail['data'][0];
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => DetailPerusahaanPage(
+                name: data['namaperusahaan'],
+                location: data['kotadomisiliperusahaan'],
+                phone: data['nomorteleponperusahaan'],
+                email: data['emailperusahaan'],
               ),
             ),
-          ),
-        ],
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Gagal memuat detail perusahaan')),
+          );
+        }
+      },
+      child: Container(
+        margin: const EdgeInsets.only(right: 8),
+        width: 150,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.2),
+              blurRadius: 5,
+              offset: const Offset(0, 3),
+            ),
+          ],
+        ),
+        clipBehavior: Clip.hardEdge,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ClipRRect(
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(12),
+                topRight: Radius.circular(12),
+              ),
+              child: Icon(
+                Icons.person,
+                size: 80,
+                color: Colors.grey[600],
+              ),
+            ),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      name,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      location,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      phone,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

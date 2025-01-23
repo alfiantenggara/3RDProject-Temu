@@ -4,6 +4,7 @@ import 'package:frontendtemu/profileperusahaan.dart';
 import 'package:frontendtemu/service/auth_service.dart';
 import 'package:frontendtemu/service/acara_service.dart';
 import 'package:frontendtemu/chatPerusahaan/chat.dart';
+import 'package:frontendtemu/detailacarapage_acara.dart'; // Import halaman DetailPageAcara
 import 'dart:convert';
 
 class DashboardPerusahaan extends StatefulWidget {
@@ -146,6 +147,7 @@ class _DashboardPerusahaanState extends State<DashboardPerusahaan> {
                                   width: double.infinity,
                                   fit: BoxFit.cover,
                                 ),
+                                acaraId: acara['id_acara'].toString(), // Gunakan 'id_acara' bukan 'id'
                               );
                             }).toList(),
                           ),
@@ -258,60 +260,73 @@ class EventCard extends StatelessWidget {
   final String title;
   final String price;
   final Image imageAsset;
+  final String acaraId; // ID acara
 
   const EventCard({
     required this.title,
     required this.price,
     required this.imageAsset,
+    required this.acaraId, // Terima ID acara
   });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(right: 8),
-      width: 150,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.2),
-            blurRadius: 5,
-            offset: const Offset(0, 3),
+    return GestureDetector(
+      onTap: () {
+        // Navigasi ke DetailPageAcara dengan membawa ID acara
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => DetailPageAcara(acaraId: acaraId),
           ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          ClipRRect(
-            borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(12),
-              topRight: Radius.circular(12),
+        );
+      },
+      child: Container(
+        margin: const EdgeInsets.only(right: 8),
+        width: 150,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.2),
+              blurRadius: 5,
+              offset: const Offset(0, 3),
             ),
-            child: imageAsset,
-          ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ClipRRect(
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(12),
+                topRight: Radius.circular(12),
+              ),
+              child: imageAsset,
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  price,
-                  style: const TextStyle(color: Colors.blue),
-                ),
-              ],
+                  const SizedBox(height: 4),
+                  Text(
+                    price,
+                    style: const TextStyle(color: Colors.blue),
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
