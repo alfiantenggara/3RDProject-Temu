@@ -81,9 +81,6 @@ class DetailPageAcaraState extends State<DetailPageAcara> {
         throw Exception('Gagal mendapatkan data chat');
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: $e')),
-      );
     }
   }
 
@@ -342,9 +339,6 @@ class DetailPageAcaraState extends State<DetailPageAcara> {
                     // Buka layar chat dengan idOrganisasi
                     _openChat(context, idOrganisasi!);
                   } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('ID Organisasi tidak valid')),
-                    );
                   }
                 },
                 style: ElevatedButton.styleFrom(
